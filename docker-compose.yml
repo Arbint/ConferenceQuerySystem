@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  upgradeboothregister:
+    build: ./src
+    image: upgradeboothregister
+    volumes:
+      - /output:/app/output
+    ports:
+      - "8051:8501"
+    command: ["streamlit", "run", "app.py"]
+  

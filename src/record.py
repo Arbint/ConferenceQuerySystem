@@ -18,7 +18,6 @@ def GetOutputDir():
     scriptFilePath = os.path.abspath(__file__)
     srcDir = os.path.dirname(scriptFilePath)
     prjDir = os.path.dirname(srcDir)
-    
     outputDir = os.path.join(prjDir, "output")
     if not os.path.exists(outputDir):
         os.mkdir(outputDir)
