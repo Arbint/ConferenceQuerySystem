@@ -18,7 +18,12 @@ def GetOutputDir():
     scriptFilePath = os.path.abspath(__file__)
     srcDir = os.path.dirname(scriptFilePath)
     prjDir = os.path.dirname(srcDir)
-    return os.path.join(prjDir, "output")
+    
+    outputDir = os.path.join(prjDir, "output")
+    if not os.path.exists(outputDir):
+        os.mkdir(outputDir)
+
+    return outputDir
 
 def GetRecordJsonFilePath():
     return os.path.normpath(os.path.join(GetOutputDir(), GetRecordJsonFileName()))
@@ -91,4 +96,6 @@ def WriteRecord(name, booth):
         csvData.append(userData)
 
     df = pd.DataFrame(csvData)
-    df.to_csv(GetRecordCSVFilePath(), index=False)
+
+    csvPath = GetRecordCSVFilePath()
+    df.to_csv(csvPath, index=False)
