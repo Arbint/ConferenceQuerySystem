@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 
+def GetRoomCodeMap():
+    return {"0010111":"modeling", "1123338":"ainmation"}
+
 def GetRecordFileName():
     return "registerRecord.csv"
 
@@ -35,6 +38,7 @@ def GetRecord():
         return df
 
     df = pd.read_csv(recordFilePath)
+    return df
 
 def WriteRecord(name, booth):
     record = GetRecord()
