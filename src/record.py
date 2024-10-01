@@ -1,45 +1,94 @@
 import os
+import json
 import pandas as pd
 
-def GetRoomCodeMap():
-    return {"0010111":"modeling", "1123338":"ainmation"}
+def GetBoothCodeMap():
+    return {"0010111":"modeling", "1123338":"animation"}
 
-def GetRecordFileName():
+def GetRecordJsonFileName():
+    return "registerRecord.json"
+
+def GetRecordCSVFileName():
     return "registerRecord.csv"
 
-def GetRecordFilePath():
+def GetBoothNames():
+    return list(GetBoothCodeMap().values())
+
+def GetOutputDir():
     scriptFilePath = os.path.abspath(__file__)
     srcDir = os.path.dirname(scriptFilePath)
     prjDir = os.path.dirname(srcDir)
-    outputDir = os.path.join(prjDir, "output")
-    return os.path.normpath(os.path.join(outputDir, GetRecordFileName()))
+    return os.path.join(prjDir, "output")
+
+def GetRecordJsonFilePath():
+    return os.path.normpath(os.path.join(GetOutputDir(), GetRecordJsonFileName()))
+
+def GetRecordCSVFilePath():
+    return os.path.normpath(os.path.join(GetOutputDir(), GetRecordCSVFileName()))
 
 def GetNameColumnName():
     return "name"
 
-def GetBoothColumnNames():
-    return "modeling", "animation", "all"
-
 def GetAllVisitedColumName():
     return "allVisited"
 
-def GetRecord():
-    recordFilePath = GetRecordFilePath()
+def GetRecord(name):
+    visitedList = []
+    notVisitedList = GetBoothNames()
+
+    recordFilePath = GetRecordJsonFilePath()
     if not os.path.exists(recordFilePath):
-        data = {
-            GetNameColumnName() : []
-        }
+        return visitedList, notVisitedList
 
-        for colName in GetBoothColumnNames():
-            data[colName] = []
+    with open(recordFilePath, 'r') as recordJsonFile:
+        data = json.load(recordJsonFile) 
+        if name in data:
+            visitedList = data[name]
 
-        df = pd.DataFrame(data)
-        df.to_csv(recordFilePath)
-        return df
+    for visited in visitedList:
+        notVisitedList.remove(visited)
 
-    df = pd.read_csv(recordFilePath)
-    return df
+    return visitedList, notVisitedList
+
+def ListToDisplayText(inList):
+    outText = ""
+    for item in inList:
+        outText += "\n"+item 
+
+    return outText
 
 def WriteRecord(name, booth):
-    record = GetRecord()
-    print(record)
+    data = {name:[booth]}
+    recordFilePath = GetRecordJsonFilePath()
+    if not os.path.exists(recordFilePath):
+        with open(recordFilePath, 'w') as recordJsonFile:
+            json.dump(data, recordJsonFile, indent=2)
+    else:
+        with open(recordFilePath, 'r') as recordJsonFile:
+            data = json.load(recordJsonFile) 
+            if name in data: 
+                if booth not in data[name]:
+                   data[name].append(booth) 
+            else:
+                data[name] =[booth]
+            
+
+        with open(recordFilePath, 'w') as recordJsonFile:
+            json.dump(data, recordJsonFile, indent=2)
+
+    csvData = []
+    for name, boothes in data.items():
+        userData = {"name":name}
+        all = 1 
+        for boothName in GetBoothNames():
+            if boothName in boothes:
+                userData[boothName] = 1
+            else:
+                userData[boothName] = 0
+                all = 0
+
+        userData["all"] = all
+        csvData.append(userData)
+
+    df = pd.DataFrame(csvData)
+    df.to_csv(GetRecordCSVFilePath(), index=False)
