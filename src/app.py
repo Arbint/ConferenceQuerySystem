@@ -30,7 +30,6 @@ class App:
             if userName:
                 st.text(f"Thank you for registering\n{userName}!")
                 self.dataBase.EnqueUserUpdate(userName, boothName)
-                st.rerun()
             else:
                 st.text("name is empty, please put in your name!")
 
@@ -45,11 +44,11 @@ class App:
         notVisited = [x.replace("_"," ") for x in notVisited]
         if notVisited:
             st.subheader("You Jurney So Far:")
-            st.text(f"you have visited: {' | '.join(visited)}")
-            st.text(f"you haven't visit: {' | '.join(notVisited)}")
+            st.text(f"you have visited:\n{'\n'.join(visited)}")
+            st.text(f"you haven't visit:\n{'\n'.join(notVisited)}")
         else:
             st.subheader("You have Finished Visiting All Booth!")
-            st.text(f"you have visited: {' | '.join(visited)}")
+            st.text(f"you have visited:\n{'\n'.join(visited)}")
 
     def ShowAdmin(self):
         st.title("UPGRADE BOOTH STATUS")
