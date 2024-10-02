@@ -1,12 +1,12 @@
 import streamlit as st
 import sqlite3
 
-from database import DataBase
+from database import DataBase, GetAdminAccessCode
 
 class App:
     def __init__(self):
         self.dataBase = DataBase()
-        self.adminCode = "ANGD4444UPGRADEVICTORIA"
+        self.adminCode = GetAdminAccessCode()
 
     def GetCode(self): 
         context=st.query_params

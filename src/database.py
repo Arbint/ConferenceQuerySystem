@@ -17,16 +17,22 @@ def GetOutputDir():
 def GetRecordCSVFilePath():
     return os.path.normpath(os.path.join(GetOutputDir(), "report.csv"))
 
+def GetBoothNameTable():
+    return {
+            '2b7d2f56fbaf5f56':"Animation",
+            'dd4d10e605e54b48':"Modeling",
+            'db702f38d9ae126e':"Programming"
+    }
+
+def GetAdminAccessCode():
+    return "ANGD4444UPGRADEVICTORIA"
+
 class DataBase:
     def __init__(self):
         self.connection = sqlite3.connect('data.db', check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.dtName=  "record"
-        self.boothNameTable = {
-            '2b7d2f56fbaf5f56':"Animation",
-            'dd4d10e605e54b48':"Modeling",
-            'db702f38d9ae126e':"Programming"
-        }
+        self.boothNameTable = GetBoothNameTable()
         self.finishedColumnName = "Finished"
         self.attendedAllColumName = "AttenedAll"
         self.dataSavePath = ""
