@@ -27,7 +27,7 @@ def GenerateQrCode(codeFileName, accessCode):
     # Create a QR code object
     qr = qrcode.QRCode(
         version=2,  # controls the size of the QR Code (1 is the smallest)
-        error_correction=qrcode.constants.ERROR_CORRECT_L,  # controls error correction
+        error_correction=qrcode.constants.ERROR_CORRECT_H,  # controls error correction
         box_size=10,  # size of the box where QR code will be displayed
         border=4,  # border size around the QR code
     )
@@ -37,7 +37,7 @@ def GenerateQrCode(codeFileName, accessCode):
     qr.make(fit=True)
 
     # Create an image from the QR code
-    qrCodeImg = qr.make_image(fill="black", back_color="white")
+    qrCodeImg = qr.make_image(fill="black", back_color="white").convert("RGB")
 
     # Find and attach Icon
     iconPath = GetIconWithName(codeFileName)
@@ -45,7 +45,7 @@ def GenerateQrCode(codeFileName, accessCode):
         qrCodeCenterIcon = Image.open(iconPath)
         qrWidth, qrHeight = qrCodeImg.size
         iconSize = qrWidth//4
-        qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize))
+        qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize), Image.Resampling.LANCZOS)
         iconPos = ((qrWidth - iconSize)//2, (qrHeight - iconSize)//2)
         qrCodeImg.paste(qrCodeCenterIcon, iconPos, mask = qrCodeCenterIcon)
 
