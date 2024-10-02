@@ -1,49 +1,59 @@
 import streamlit as st
-import queue
-import threading
+import sqlite3
 
-from record import GetBoothCodeMap, WriteRecord, GetRecord, ListToDisplayText
+from database import DataBase
 
-q=queue.Queue()
+class App:
+    def __init__(self):
+        self.dataBase = DataBase()
+        self.adminCode = "ANGD4444UPGRADEVICTORIA"
 
-def WriteToDataWorker():
-    while True:
-        data = q.get()
-        if data is None:
-            continue
+    def GetCode(self): 
+        context=st.query_params
+        return context.get("c", "")
 
-        name = data[0]
-        booth = data[1]
-        WriteRecord(name, booth)
+    def Start(self):
+        code = self.GetCode()
+        if code == self.adminCode:
+            self.ShowAdmin()
+        else:
+            self.ShowBoothGreeting(code)
 
-workerThread = threading.Thread(target = WriteToDataWorker, daemon=True)
-workerThread.start()
+    def ShowBoothGreeting(self, boothCode):
+        boothName = self.dataBase.GetBoothTable()[boothCode] 
+        st.title("Welcom to UPGRADE!")
+        st.subheader(f"you are at the {boothName} booth")
+        userName = st.text_input("Enter your name: ")
+        self.DisplayUserInfo(userName)
 
-def DisplayUserInfo(userName):
-    if not userName:
-        return
-    visited, notVisited = GetRecord(userName)
+        if st.button("Register"):
+            if userName:
+                st.text(f"Thank you for registering\n{userName}!")
+                self.dataBase.EnqueUserUpdate(userName, boothName)
+                st.rerun()
+            else:
+                st.text("name is empty, please put in your name!")
 
-    st.subheader("You have visited:")
-    st.text(ListToDisplayText(visited))
+    def DisplayUserInfo(self, userName):
+        recordDf = self.dataBase.GetUserRecordAsDataFrame(userName)
+        if recordDf.empty:
+            st.subheader("Press Register to Update your Jurney!")
+            return
 
-    st.subheader("you haven't visit:")
-    st.text(ListToDisplayText(notVisited))
+        visited, notVisited = self.dataBase.GetUserJurney(userName)
+        visited = [x.replace("_"," ") for x in visited]
+        notVisited = [x.replace("_"," ") for x in notVisited]
+        if notVisited:
+            st.subheader("You Jurney So Far:")
+            st.text(f"you have visited: {' | '.join(visited)}")
+            st.text(f"you haven't visit: {' | '.join(notVisited)}")
+        else:
+            st.subheader("You have Finished Visiting All Booth!")
+            st.text(f"you have visited: {' | '.join(visited)}")
 
-context=st.query_params
-boothCode = context.get("c", "")
-codeMap = GetBoothCodeMap()
-boothName = codeMap[boothCode] 
+    def ShowAdmin(self):
+        st.title("UPGRADE BOOTH STATUS")
+        st.dataframe(self.dataBase.GetDataAsDataFrame())
 
-st.title("Welcom to UPGRADE!")
-st.subheader(f"you are at the {boothName} booth")
-userName = st.text_input("Enter your name: ")
-DisplayUserInfo(userName)
-
-if st.button("Register"):
-    if userName:
-        st.text(f"Thank you for registering\n{userName}!")
-        q.put([userName, boothName])
-    else:
-        st.text("name is empty, please put in your name!")
-
+app = App()
+app.Start()
