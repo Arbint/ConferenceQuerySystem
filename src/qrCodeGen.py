@@ -14,15 +14,16 @@ def GetIconWithName(name):
     
 def GenerateAllQrCodes():
     for code, boothName in GetBoothNameTable().items():
-        GenerateQrCode(boothName, code)
+        data = f"{GetServerURL()}/?c={code}"
+        GenerateQrCode(boothName, data)
 
-    GenerateQrCode("Admin", GetAdminAccessCode())
+    data = f"{GetServerURL()}/?c={GetAdminAccessCode()}"
+    GenerateQrCode("Admin",data)
 
 def GetServerURL():
     return "http://3.137.157.79:8501"
 
-def GenerateQrCode(codeFileName, accessCode):
-    data = f"{GetServerURL()}/?c={accessCode}"
+def GenerateQrCode(codeFileName, data):
     
     # Create a QR code object
     qr = qrcode.QRCode(
