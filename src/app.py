@@ -1,6 +1,4 @@
 import streamlit as st
-import sqlite3
-
 from database import DataBase, GetAdminAccessCode
 
 class App:
@@ -33,6 +31,10 @@ class App:
             else:
                 st.text("name is empty, please put in your name!")
 
+        if st.button("refresh"):
+            st.rerun()
+    
+
     def DisplayUserInfo(self, userName):
         recordDf = self.dataBase.GetUserRecordAsDataFrame(userName)
         if recordDf.empty:
@@ -52,6 +54,8 @@ class App:
 
     def ShowAdmin(self):
         st.title("UPGRADE BOOTH STATUS")
+        if st.button("refresh"):
+            st.rerun()
         st.dataframe(self.dataBase.GetDataAsDataFrame())
 
 app = App()
