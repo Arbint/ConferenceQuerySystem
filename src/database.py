@@ -3,29 +3,7 @@ import os
 import pandas as pd
 import threading
 import queue
-
-def GetOutputDir():
-    scriptFilePath = os.path.abspath(__file__)
-    srcDir = os.path.dirname(scriptFilePath)
-    prjDir = os.path.dirname(srcDir)
-    outputDir = os.path.join(prjDir, "output")
-    if not os.path.exists(outputDir):
-        os.mkdir(outputDir)
-
-    return outputDir
-
-def GetRecordCSVFilePath():
-    return os.path.normpath(os.path.join(GetOutputDir(), "report.csv"))
-
-def GetBoothNameTable():
-    return {
-            '2b7d2f56fbaf5f56':"Animation",
-            'dd4d10e605e54b48':"Modeling",
-            'db702f38d9ae126e':"Programming"
-    }
-
-def GetAdminAccessCode():
-    return "ANGD4444UPGRADEVICTORIA"
+from consts import GetBoothNameTable
 
 class DataBase:
     def __init__(self):
@@ -72,9 +50,6 @@ class DataBase:
                 print("=====================================================")
 
         self.StopWriteThread()
-
-    def GetBoothTable(self):
-        return self.boothNameTable
 
     def CreateDataTable(self):
         columnDefination = f'''id INTEGER PRIMARY KEY AUTOINCREMENT,\nname TEXT UNIQUE'''
@@ -156,7 +131,3 @@ class DataBase:
 
         df[self.attendedAllColumName] = (df[self.finishedColumnName] == len(BoothNames)).astype(int)
         return df
-
-    def SaveDataToCSV(self):
-        df = self.GetDataAsDataFrame()
-        df.to_csv(GetRecordCSVFilePath())

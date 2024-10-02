@@ -1,10 +1,10 @@
 import streamlit as st
-from database import DataBase, GetAdminAccessCode
+from database import DataBase
+from consts import GetAdminAccessCode, GetBoothNameTable
 
 class App:
     def __init__(self):
         self.dataBase = DataBase()
-        self.adminCode = GetAdminAccessCode()
 
     def GetCode(self): 
         context=st.query_params
@@ -12,13 +12,13 @@ class App:
 
     def Start(self):
         code = self.GetCode()
-        if code == self.adminCode:
+        if code == GetAdminAccessCode():
             self.ShowAdmin()
         else:
             self.ShowBoothGreeting(code)
 
     def ShowBoothGreeting(self, boothCode):
-        boothName = self.dataBase.GetBoothTable()[boothCode] 
+        boothName = GetBoothNameTable()[boothCode] 
         st.title("Welcom to UPGRADE!")
         st.subheader(f"you are at the {boothName} booth")
         userName = st.text_input("Enter your name: ")

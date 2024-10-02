@@ -1,7 +1,16 @@
 import qrcode
 import os
-from database import GetBoothNameTable, GetOutputDir, GetAdminAccessCode
+from database import GetBoothNameTable, GetOutputDir, GetAdminAccessCode, GetAssetDir
 
+def GetQrCodeAssetPath():
+    return os.path.join("qrcodeIcons") 
+
+def GetIconWithName(name):
+    path = os.path.join(GetQrCodeAssetPath(), name+".png")
+    if os.path.exists(path):
+        return path
+    return None
+    
 def GenerateAllQrCodes():
     for code, boothName in GetBoothNameTable().items():
         GenerateQrCode(boothName, code)
