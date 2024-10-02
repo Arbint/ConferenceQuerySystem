@@ -1,12 +1,13 @@
-version: "3.8"
-
+version: '3.8'
 services:
   upgradeboothregister:
     build: ./src
     image: upgradeboothregister
+    container_name: upgradeboothregister
     volumes:
-      - /output:/app/output
+      - /output/:/app/output
     ports:
-      - "8051:8501"
+      - '8501:8501/udp'
+      - '8501:8501/tcp'
     command: ["streamlit", "run", "app.py"]
-  
+
