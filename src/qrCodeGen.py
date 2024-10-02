@@ -1,9 +1,10 @@
 import qrcode
 import os
-from database import GetBoothNameTable, GetOutputDir, GetAdminAccessCode, GetAssetDir
+from consts import GetBoothNameTable, GetOutputDir, GetAdminAccessCode, GetAssetDir
+from PIL import Image
 
 def GetQrCodeAssetPath():
-    return os.path.join("qrcodeIcons") 
+    return os.path.join(GetAssetDir(), "qrcodeIcons") 
 
 def GetIconWithName(name):
     path = os.path.join(GetQrCodeAssetPath(), name+".png")
@@ -36,9 +37,19 @@ def GenerateQrCode(codeFileName, accessCode):
     qr.make(fit=True)
 
     # Create an image from the QR code
-    img = qr.make_image(fill="black", back_color="white")
+    qrCodeImg = qr.make_image(fill="black", back_color="white")
+
+    # Find and attach Icon
+    iconPath = GetIconWithName(codeFileName)
+    if iconPath:
+        qrCodeCenterIcon = Image.open(iconPath)
+        qrWidth, qrHeight = qrCodeImg.size
+        iconSize = qrWidth//4
+        qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize))
+        iconPos = ((qrWidth - iconSize)//2, (qrHeight - iconSize)//2)
+        qrCodeImg.paste(qrCodeCenterIcon, iconPos, mask = qrCodeCenterIcon)
 
     # Save the image file
-    img.save(os.path.join(GetOutputDir(), codeFileName+".png"))
+    qrCodeImg.save(os.path.join(GetOutputDir(), codeFileName+".png"))
 
 GenerateAllQrCodes()
