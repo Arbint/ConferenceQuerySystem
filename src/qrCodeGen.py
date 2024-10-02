@@ -1,7 +1,7 @@
 import qrcode
 import os
 from consts import GetBoothNameTable, GetOutputDir, GetAdminAccessCode, GetAssetDir
-from PIL import Image
+from PIL import Image, ImageOps
 import math
 
 def GetQrCodeAssetPath():
@@ -72,6 +72,8 @@ def GenerateQrCode(codeFileName, data):
     iconPath = GetIconWithName(codeFileName)
     if iconPath:
         qrCodeCenterIcon = Image.open(iconPath)
+        borderSize = 20
+        qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill="black")
         qrWidth, qrHeight = qrCodeImg.size
         iconSize = qrWidth//4
         qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize), Image.Resampling.LANCZOS)
