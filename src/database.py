@@ -23,9 +23,9 @@ class DataBase:
         self.cursor = self.connection.cursor()
         self.dtName=  "record"
         self.boothNameTable = {
-            'angd1331':"Animation",
-            'angd1341':"Modeling",
-            'angd1371':"Programming"
+            '2b7d2f56fbaf5f56':"Animation",
+            'dd4d10e605e54b48':"Modeling",
+            'db702f38d9ae126e':"Programming"
         }
         self.finishedColumnName = "Finished"
         self.attendedAllColumName = "AttenedAll"
