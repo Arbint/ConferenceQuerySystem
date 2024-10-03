@@ -1,2 +1,2 @@
 #!/bin/bash
-docker cp upgradeboothregister:/app/src/data.db ~/data.db
+docker cp upgradeboothregister:/app/data.db ~/data.db
