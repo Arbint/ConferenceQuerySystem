@@ -131,15 +131,3 @@ class DataBase:
 
         df[self.attendedAllColumName] = (df[self.finishedColumnName] == len(BoothNames)).astype(int)
         return df
-
-    @staticmethod
-    def ConvertDataToCSV():
-        dataPath = os.path.join(GetPrjDir(), 'data.db')
-        if os.path.exists(dataPath):
-            connection = sqlite3.connect(dataPath, check_same_thread=False)
-            query = f"SELECT * FROM record"
-            df = pd.read_sql_query(query, connection)
-            df.to_csv(GetCSVOutputPath())
-        else:
-            print("data.db does not exists, you can use the script/copyDataToLocal.sh to retreve it")
-        
