@@ -79,11 +79,10 @@ def GenerateQrCode(codeFileName, data):
     if not iconPath:
         iconPath = GetDefaultIconPath()
 
-    print(iconPath)
     if iconPath:
         qrCodeCenterIcon = Image.open(iconPath)
-        borderSize = 20
-        qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill="black")
+        borderSize = 40
+        qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill=(255,100,0))
         qrWidth, qrHeight = qrCodeImg.size
         iconSize = qrWidth//4
         qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize), Image.Resampling.LANCZOS)
@@ -113,7 +112,6 @@ def CombineQrCodeIntoImage(numOfColums = 3):
     currentIndex = 0
     for y in range(numOfRows):
         for x in range(numOfColums):
-            print(f"x is: {x}, y is: {y}")
             if currentIndex < len(images):
                 image = images[currentIndex]
                 combinedImage.paste(image, (x * image.width, y * image.height))
