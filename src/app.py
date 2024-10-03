@@ -20,7 +20,7 @@ class App:
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
         st.title("Welcom to UPGRADE!")
-        st.subheader(f"you are at the {boothName} booth")
+        st.subheader(f"you are at the {boothName.replace("_", " ")} booth")
         userName = st.text_input("Enter your name: ")
         self.DisplayUserInfo(userName)
 
