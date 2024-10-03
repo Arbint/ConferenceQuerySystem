@@ -52,7 +52,7 @@ class DataBase:
         self.StopWriteThread()
 
     def CreateDataTable(self):
-        columnDefination = f'''id INTEGER PRIMARY KEY AUTOINCREMENT,\nname TEXT UNIQUE'''
+        columnDefination = f'''id INTEGER PRIMARY KEY AUTOINCREMENT,\nname TEXT,\nschool TEXT'''
 
         for boothName in self.boothNameTable.values():
             columnDefination += f",\n{boothName} INTEGER"
@@ -104,7 +104,7 @@ class DataBase:
             else:
                 values.append('0')
 
-        query = f'INSERT INTO {self.dtName} ({','.join(colNames)}) VALUES (?, {','.join(values)})'
+        query = f'INSERT INTO {self.dtName} ({','.join(colNames)}) VALUES (?, ?, {','.join(values)})'
         self.cursor.execute(query,(name,school,))
         self.connection.commit()
 

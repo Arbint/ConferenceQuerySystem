@@ -29,7 +29,7 @@ class App:
         if st.button("Register"):
             if userName and schoolName:
                 st.text(f"Thank you for registering\n{userName}!")
-                self.dataBase.EnqueUserUpdate(userName, boothName)
+                self.dataBase.EnqueUserUpdate(userName, schoolName, boothName)
             elif not userName:
                 st.text("name is empty, please fill in your name!")
             else:
@@ -52,9 +52,9 @@ class App:
         notVisitedDisplayText = '\n'.join(notVisited)
         if notVisited:
             st.subheader("You Journey So Far:")
-            st.markdown("***You Have Visited:\n***")
+            st.markdown("***You Have Visited:***\n")
             st.text(visitedDisplayText)
-            st.markdown("***You Haven't Visit:\n***")
+            st.markdown("***You Haven't Visit:***\n")
             st.text(notVisitedDisplayText)
         else:
             st.subheader("You have Finished Visiting All Booth!")
