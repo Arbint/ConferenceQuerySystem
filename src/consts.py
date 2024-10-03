@@ -6,6 +6,9 @@ def GetPrjDir():
     prjDir = os.path.dirname(srcDir)
     return os.path.normpath(prjDir) 
 
+def GetScriptsDir():
+    return os.path.join(GetPrjDir(), "scripts")
+
 def GetAssetDir():
     return os.path.join(GetPrjDir(), "assets")
 
@@ -16,6 +19,13 @@ def GetOutputDir():
         os.mkdir(outputDir)
 
     return outputDir
+
+def GetCSVOutputPath():
+    path = os.path.join(GetOutputDir(), "csvs")
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    return os.path.normpath(os.path.join(path, "data.csv"))
 
 def GetBoothNameTable():
     return {

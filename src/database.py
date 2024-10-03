@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import threading
 import queue
-from consts import GetBoothNameTable
+from consts import GetBoothNameTable, GetPrjDir, GetCSVOutputPath
 
 class DataBase:
     def __init__(self):
@@ -104,7 +104,7 @@ class DataBase:
             else:
                 values.append('0')
 
-        query = f'INSERT INTO {self.dtName} ({','.join(colNames)}) VALUES (?, ?, {','.join(values)})'
+        query = f'INSERT INTO {self.dtName} ({",".join(colNames)}) VALUES (?, ?, {",".join(values)})'
         self.cursor.execute(query,(name,school,))
         self.connection.commit()
 
@@ -131,3 +131,15 @@ class DataBase:
 
         df[self.attendedAllColumName] = (df[self.finishedColumnName] == len(BoothNames)).astype(int)
         return df
+
+    @staticmethod
+    def ConvertDataToCSV():
+        dataPath = os.path.join(GetPrjDir(), 'data.db')
+        if os.path.exists(dataPath):
+            connection = sqlite3.connect(dataPath, check_same_thread=False)
+            query = f"SELECT * FROM record"
+            df = pd.read_sql_query(query, connection)
+            df.to_csv(GetCSVOutputPath())
+        else:
+            print("data.db does not exists, you can use the script/copyDataToLocal.sh to retreve it")
+        
