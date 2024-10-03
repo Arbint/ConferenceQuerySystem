@@ -26,6 +26,12 @@ def GetIconWithName(name):
         return path
     return None
     
+def GetDefaultIconPath():
+    path = os.path.join(GetQrCodeAssetPath(), "Default.png")
+    if os.path.exists(path):
+        return os.path.normpath(path)
+    return None
+
 def GenerateAllQrCodes():
     for code, boothName in GetBoothNameTable().items():
         data = f"{GetServerURL()}/?c={code}"
@@ -70,6 +76,10 @@ def GenerateQrCode(codeFileName, data):
 
     # Find and attach Icon
     iconPath = GetIconWithName(codeFileName)
+    if not iconPath:
+        iconPath = GetDefaultIconPath()
+
+    print(iconPath)
     if iconPath:
         qrCodeCenterIcon = Image.open(iconPath)
         borderSize = 20
