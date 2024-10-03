@@ -1,7 +1,6 @@
-from database import DataBase
 import subprocess
 import os
-from consts import GetScriptsDir, GetPrjDir, GetCSVOutputPath, GetBoothNameTable
+from consts import GetScriptsDir, GetPrjDir, GetCSVOutputPath, GetBoothNameTable, GetOutputDir
 import sqlite3
 import pandas as pd
 
@@ -46,9 +45,19 @@ def GetDfFromQuery(query):
     print("data.db does not exists, you can use the script/copyDataToLocal.sh to retreve it")
     return None
 
+def WriteListToOutput(outputList, name, seperator=',', perline=True):
+    outputPath = os.path.join(GetOutputDir(), name)
+    fileContent = ""
+
+    for item in outputList:
+        fileContent += item + seperator
+        if perline:
+            fileContent += "\n"
+
+    with open(outputPath, 'w') as file:
+        file.write(fileContent)
+
 if __name__ == "__main__":
     FetchAndConvertRemoteDataToCSV()
     names = GetNamesWithAttendCountHigherThan(3)
-    if names:
-        for name in names:
-            print(name)
+    WriteListToOutput(names, "biggerThan3.txt")
