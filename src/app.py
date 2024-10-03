@@ -20,39 +20,45 @@ class App:
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
         st.title("Welcome to UPGRADE!")
-        st.subheader(f"You are at the {boothName.replace("_", " ")} booth")
+        boothDisplayName = boothName.replace("_"," ")
+        st.subheader(f"You are at the {boothDisplayName} booth")
         userName = st.text_input("Enter your name: ")
-        self.DisplayUserInfo(userName)
+        schoolName = st.text_input("Enter your school: ")
+        self.DisplayUserInfo(userName, schoolName)
 
         if st.button("Register"):
-            if userName:
+            if userName and schoolName:
                 st.text(f"Thank you for registering\n{userName}!")
                 self.dataBase.EnqueUserUpdate(userName, boothName)
+            elif not userName:
+                st.text("name is empty, please fill in your name!")
             else:
-                st.text("name is empty, please put in your name!")
+                st.text("school is empty, please fill in your school!")
 
         if st.button("refresh"):
             st.rerun()
     
 
-    def DisplayUserInfo(self, userName):
-        recordDf = self.dataBase.GetUserRecordAsDataFrame(userName)
+    def DisplayUserInfo(self, userName, schoolName):
+        recordDf = self.dataBase.GetUserRecordAsDataFrame(userName, schoolName)
         if recordDf.empty:
             st.subheader("Press Register to Start Your Journey!")
             return
 
-        visited, notVisited = self.dataBase.GetUserJourney(userName)
+        visited, notVisited = self.dataBase.GetUserJourney(userName, schoolName)
         visited = [x.replace("_"," ") for x in visited]
         notVisited = [x.replace("_"," ") for x in notVisited]
+        visitedDisplayText = '\n'.join(visited)
+        notVisitedDisplayText = '\n'.join(notVisited)
         if notVisited:
             st.subheader("You Journey So Far:")
-            st.markdown("***You Have Visited:***")
-            st.text(f"\n{'\n'.join(visited)}")
-            st.markdown("***You Haven't Visit:***")
-            st.text(f"\n{'\n'.join(notVisited)}")
+            st.markdown("***You Have Visited:\n***")
+            st.text(visitedDisplayText)
+            st.markdown("***You Haven't Visit:\n***")
+            st.text(notVisitedDisplayText)
         else:
             st.subheader("You have Finished Visiting All Booth!")
-            st.text(f"you have visited:\n{'\n'.join(visited)}")
+            st.text(visitedDisplayText)
 
     def ShowAdmin(self):
         st.title("UPGRADE BOOTH STATUS")

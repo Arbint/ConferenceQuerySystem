@@ -21,8 +21,8 @@ class DataBase:
 
         self.CreateDataTable()
 
-    def EnqueUserUpdate(self, name, visitedBooth):
-        self.writeQueue.put([name, visitedBooth])
+    def EnqueUserUpdate(self, name, school, visitedBooth):
+        self.writeQueue.put([name, school, visitedBooth])
         self.StartWriteThread()
 
     def StartWriteThread(self):
@@ -43,7 +43,7 @@ class DataBase:
             data = self.writeQueue.get()
             print(f"process queued data: {data}")
             try:
-                self.AddOrUpdateUser(data[0], data[1])
+                self.AddOrUpdateUser(data[0], data[1], data[2])
             except sqlite3.OperationalError as e:
                 print("=======================EORROR========================")
                 print(f"error during write operation: {e}")
@@ -59,17 +59,17 @@ class DataBase:
 
         self.cursor.execute(f'CREATE TABLE IF NOT EXISTS {self.dtName} ({columnDefination})')
 
-    def GetRecordByName(self, name):
-        self.cursor.execute(f'SELECT * FROM {self.dtName} WHERE name = ?', (name,))
+    def GetRecord(self, name, school):
+        self.cursor.execute(f'SELECT * FROM {self.dtName} WHERE name = ? AND school= ?', (name,school,))
         user = self.cursor.fetchone()
         return user
 
-    def GetUserRecordAsDataFrame(self, name):
-        query = f"SELECT * FROM {self.dtName} WHERE name = ?"
-        return pd.read_sql_query(query, self.connection, params=(name,))
+    def GetUserRecordAsDataFrame(self, name, school):
+        query = f"SELECT * FROM {self.dtName} WHERE name = ? AND school = ?"
+        return pd.read_sql_query(query, self.connection, params=(name,school, ))
 
-    def GetUserJourney(self, name):
-        df = self.GetUserRecordAsDataFrame(name)
+    def GetUserJourney(self, name, school):
+        df = self.GetUserRecordAsDataFrame(name, school)
         visited = []
         notVisited = self.GetBoothNames()
         if df.empty:
@@ -81,19 +81,19 @@ class DataBase:
                 notVisited.remove(boothName)
         return visited, notVisited
 
-    def AddOrUpdateUser(self, name, visitedBooth):
-        record = self.GetRecordByName(name)
+    def AddOrUpdateUser(self, name, school, visitedBooth):
+        record = self.GetRecord(name, school)
         if record:
-            self.UpdateUser(name, visitedBooth)
+            self.UpdateUser(name, school, visitedBooth)
         else:
-            self.AddUser(name, visitedBooth)
+            self.AddUser(name, school, visitedBooth)
 
-    def AddUser(self, name, visitedBooth):
-        if self.GetRecordByName(name):
+    def AddUser(self, name, school, visitedBooth):
+        if self.GetRecord(name, school):
             return
 
-        print(f"adding new user: {name}")
-        colNames = ["name"]
+        print(f"adding new user: {name} from {school}")
+        colNames = ["name", "school"]
         values = []
 
         boothNames = list(self.boothNameTable.values())
@@ -105,18 +105,18 @@ class DataBase:
                 values.append('0')
 
         query = f'INSERT INTO {self.dtName} ({','.join(colNames)}) VALUES (?, {','.join(values)})'
-        self.cursor.execute(query,(name,))
+        self.cursor.execute(query,(name,school,))
         self.connection.commit()
 
     def GetBoothNames(self):
         return list(self.boothNameTable.values())
 
-    def UpdateUser(self, name, newVisitedBooth):
+    def UpdateUser(self, name, school, newVisitedBooth):
         print(f"updating user: {name} with new booth: {newVisitedBooth}")
         
-        query = f'UPDATE {self.dtName} SET {newVisitedBooth} = 1 WHERE name=?'
+        query = f'UPDATE {self.dtName} SET {newVisitedBooth} = 1 WHERE name=? AND school=?'
         print(query)
-        self.cursor.execute(query, (name,))
+        self.cursor.execute(query, (name,school,))
         self.connection.commit()
 
     def GetDataAsDataFrame(self):
