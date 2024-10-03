@@ -68,7 +68,7 @@ class DataBase:
         query = f"SELECT * FROM {self.dtName} WHERE name = ?"
         return pd.read_sql_query(query, self.connection, params=(name,))
 
-    def GetUserJurney(self, name):
+    def GetUserJourney(self, name):
         df = self.GetUserRecordAsDataFrame(name)
         visited = []
         notVisited = self.GetBoothNames()

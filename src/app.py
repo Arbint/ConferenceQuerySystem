@@ -20,7 +20,7 @@ class App:
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
         st.title("Welcom to UPGRADE!")
-        st.subheader(f"you are at the {boothName.replace("_", " ")} booth")
+        st.subheader(f"You are at the {boothName.replace("_", " ")} booth")
         userName = st.text_input("Enter your name: ")
         self.DisplayUserInfo(userName)
 
@@ -41,13 +41,15 @@ class App:
             st.subheader("Press Register to Start Your Journey!")
             return
 
-        visited, notVisited = self.dataBase.GetUserjourney(userName)
+        visited, notVisited = self.dataBase.GetUserJourney(userName)
         visited = [x.replace("_"," ") for x in visited]
         notVisited = [x.replace("_"," ") for x in notVisited]
         if notVisited:
             st.subheader("You Journey So Far:")
-            st.text(f"you have visited:\n{'\n'.join(visited)}")
-            st.text(f"you haven't visit:\n{'\n'.join(notVisited)}")
+            st.markdown("***You Have Visited:***")
+            st.text(f"\n{'\n'.join(visited)}")
+            st.markdown("***You Haven't Visit:***")
+            st.text(f"\n{'\n'.join(notVisited)}")
         else:
             st.subheader("You have Finished Visiting All Booth!")
             st.text(f"you have visited:\n{'\n'.join(visited)}")
