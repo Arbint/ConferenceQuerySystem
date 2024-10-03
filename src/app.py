@@ -1,5 +1,6 @@
 import streamlit as st
 from database import DataBase
+from fetch import GetNamesWithAttendCountHigherThan
 from consts import GetAdminAccessCode, GetBoothNameTable
 
 class App:
@@ -65,6 +66,12 @@ class App:
         if st.button("refresh"):
             st.rerun()
         st.dataframe(self.dataBase.GetDataAsDataFrame())
+        number = st.number_input("Filter Total Visit Bigger Than or Equal to:", min_value = 0, max_value = 7, value=7, step=1)
+        names = GetNamesWithAttendCountHigherThan(number-1)
+        namesDisplayText = ""
+        for name in names:
+            namesDisplayText += name + "\n"
+        st.text(namesDisplayText)
 
 app = App()
 app.Start()
