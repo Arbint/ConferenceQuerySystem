@@ -24,8 +24,11 @@ def GetNamesWithAttendCountHigherThan(count):
     columns = list(GetBoothNameTable().values())
     filter = f"({'+'.join(columns)})>{count}"
     df = GetDFWithFilter(filter)
-    df["name and school"] = df["name"] + " from " + df["school"]
-    return df["name and school"].tolist()
+    if df is not None:
+        df["name and school"] = df["name"] + " from " + df["school"]
+        return df["name and school"].tolist()
+
+    return []
 
 def ConvertDataToCSV():
     df = GetDataAsDf()
