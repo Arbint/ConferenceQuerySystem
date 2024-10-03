@@ -38,14 +38,14 @@ class App:
     def DisplayUserInfo(self, userName):
         recordDf = self.dataBase.GetUserRecordAsDataFrame(userName)
         if recordDf.empty:
-            st.subheader("Press Register to Update your Jurney!")
+            st.subheader("Press Register to Start Your Journey!")
             return
 
-        visited, notVisited = self.dataBase.GetUserJurney(userName)
+        visited, notVisited = self.dataBase.GetUserjourney(userName)
         visited = [x.replace("_"," ") for x in visited]
         notVisited = [x.replace("_"," ") for x in notVisited]
         if notVisited:
-            st.subheader("You Jurney So Far:")
+            st.subheader("You Journey So Far:")
             st.text(f"you have visited:\n{'\n'.join(visited)}")
             st.text(f"you haven't visit:\n{'\n'.join(notVisited)}")
         else:
