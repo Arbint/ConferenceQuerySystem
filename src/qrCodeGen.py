@@ -4,6 +4,24 @@ from consts import GetBoothNameTable, GetOutputDir, GetAdminAccessCode, GetAsset
 from PIL import Image, ImageOps
 import math
 
+def GetQRCodeIconColorForName(name):
+    if name == "Animation_Demo":
+        return "#C10808"
+    if name == "Animation_Interactive":
+        return "#ff8989"
+    if name == "Modeling_Demo":
+        return "#239b56"
+    if name == "Modeling_Interactive":
+        return "#8aff80"
+    if name == "Ballroom_Animation":
+        return "#008fff"
+    if name == "Ballroom_Modeling":
+        return "#fbff00"
+    if name == "Ballroom_Programming":
+        return "#9e4eff"
+    
+    return "#bcbcbc"
+
 def GetQrCodeAssetPath():
     path = os.path.join(GetAssetDir(), "qrcodeIcons") 
     path = os.path.normpath(path)
@@ -82,7 +100,7 @@ def GenerateQrCode(codeFileName, data):
     if iconPath:
         qrCodeCenterIcon = Image.open(iconPath)
         borderSize = 40
-        qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill=(255,100,0))
+        qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill=GetQRCodeIconColorForName(codeFileName))
         qrWidth, qrHeight = qrCodeImg.size
         iconSize = qrWidth//4
         qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize), Image.Resampling.LANCZOS)
