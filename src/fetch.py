@@ -62,5 +62,5 @@ def WriteListToOutput(outputList, name, seperator=',', perline=True):
 
 if __name__ == "__main__":
     FetchAndConvertRemoteDataToCSV()
-    names = GetNamesWithAttendCountHigherThan(3)
+    names = GetNamesWithAttendCountHigherThan(0)
     WriteListToOutput(names, "biggerThan3.txt")

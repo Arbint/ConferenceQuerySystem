@@ -24,3 +24,4 @@ docker cp upgradeboothregister:/app/src/data.db ~/data.db
 scp -i upgrade_sshkey.pem ec2-user@3.137.157.79:~/data.db ~/data.db 
 ```
 
+these 2 can be achieved by navigating to scripts.

@@ -7,13 +7,13 @@ from consts import GetBoothNameTable, GetPrjDir, GetCSVOutputPath
 
 class DataBase:
     def __init__(self):
-        self.connection = sqlite3.connect('data.db', check_same_thread=False)
+        dataBasePath = os.path.normpath(os.path.join(GetPrjDir(), 'data.db'))
+        self.connection = sqlite3.connect(dataBasePath, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.dtName=  "record"
         self.boothNameTable = GetBoothNameTable()
         self.finishedColumnName = "Finished"
         self.attendedAllColumName = "AttenedAll"
-        self.dataSavePath = ""
 
         self.writeQueue = queue.Queue()
         self.threadLock = threading.Lock()
