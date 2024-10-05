@@ -1,4 +1,4 @@
-# Booth Registery
+# Conference Query System
 
 <img src="documentationAssets/frontend.png" width = 400><img src="documentationAssets/admin.png" width = 400>
 
@@ -53,7 +53,7 @@ The system is has 5 major modules:
     this module stores configurations of the system, in here you can configure the following:
   * the user infomation to collect in the front end (user name, school, etc)
 
-  * the booth names and their codes as a dictionary. The code of the booth is used to generate the qr code for the booth, if the booth code is ```caf414ad66ab482c```, the url embeded in the qr code will be ```http://<servierip>:8501/c=caf414ad66ab482c``` The url takes in a argument ```c``` with the code value to identify which booth the user scaned.
+  * the booth names and their codes as a dictionary. The code of the booth is used to generate the qr code for the booth, if the booth code is ```caf414ad66ab482c```, the url embeded in the qr code will be ```http://<server_ip>:8501/c=caf414ad66ab482c``` The url takes in a argument ```c``` with the code value to identify which booth the user scaned.
 
   * the admin code for the admin page. If the ```c``` argument is the admin code, it will open the admin page.
 
@@ -70,7 +70,7 @@ The system is has 5 major modules:
 ## Deploy
 
 It is recommend to deploy it with docker and the provided ```docker-compose.yml``` file. You may what to change the service, image, and container name, to yours.
-Simply pull the repo to your server, use termial to navigate to the repo root directory, and run:
+Simply pull the repo to your server, use terminal to navigate to the repo root directory, and run:
 
 ```sh
 docker-compose build 
