@@ -4,13 +4,13 @@
 
 ## Features
 
-This booth registery system can be used to keep track of the booths paticipants has participated in a conference.
+This conference query system can be used to keep track of the various booths the paticipants has participated in a conference.
 
 It has the following features:
 
-* Allowing flexiable amout of boothes being configured.
+* Allowing flexiable amout of booths being configured.
 
-* Track what boothes a participant has visitied.
+* Track what booths a participant has visitied.
 
 * Track the total amout of boothes a participant has visited.
 
@@ -18,7 +18,7 @@ It has the following features:
 
 * Has admin page to see and download the record.
 
-* The admin page has a fitler to filter the records by the amount of boothes visited.
+* The admin page has a fitler to filter the records by the amount of booths visited.
 
 * Has utility functions to retrieve data from server to local machine, and generate csv
 
