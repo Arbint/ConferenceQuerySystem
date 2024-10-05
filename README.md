@@ -1,5 +1,7 @@
 # Booth Registery
 
+<img src="documentationAssets/frontend.png" width = 400><img src="documentationAssets/admin.png" width = 400>
+
 ## Features
 
 This booth registery system can be used to keep track of the booths paticipants has participated in a conference.
