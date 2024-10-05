@@ -42,7 +42,7 @@ The system has 5 major modules:
 
 * The app module ```app.py```
 
-    this module uses the streamlit libaray to display the greetings, as for user info, and allows the user to register and check their current status (what booth they have and haven't visited)
+    this module uses the streamlit libaray to display the greetings, ask for user info, and allows the user to register and check their current status (what booth they have and haven't visited)
 
 * The database module ```database.py```
 
