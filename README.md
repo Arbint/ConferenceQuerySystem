@@ -38,7 +38,7 @@ This system is developed with ```python```, it uses ```Streamlit``` as the front
 
 ## Structure
 
-The system is has 5 major modules:
+The system has 5 major modules:
 
 * The app module ```app.py```
 
