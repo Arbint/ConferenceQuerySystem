@@ -1,5 +1,8 @@
 import os
 
+def GetConferenceName():
+    return "UPGRADE"
+
 def GetPrjDir():
     scriptFilePath = os.path.abspath(__file__)
     srcDir = os.path.dirname(scriptFilePath)
@@ -31,7 +34,7 @@ def GetDataBasePath():
     return os.path.normpath(os.path.join(GetPrjDir(), "data.db"))
 
 def GetUsrDataCollectEntires():
-    return ["name", "occupation"] 
+    return ["name", "school", "occupation"] 
 
 def GetBoothNameTable():
     return {

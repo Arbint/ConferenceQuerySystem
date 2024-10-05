@@ -20,15 +20,10 @@ def GetDFWithFilter(filter):
     query = f"SELECT * From record WHERE {filter}"
     return GetDfFromQuery(query)
 
-def GetNamesWithAttendCountHigherThan(count):
+def GetUsersWithAttendedCountHigherThan(count):
     columns = list(GetBoothNameTable().values())
     filter = f"({'+'.join(columns)})>{count}"
-    df = GetDFWithFilter(filter)
-    if df is not None:
-        df["name and school"] = df["name"] + " from " + df["school"]
-        return df["name and school"].tolist()
-
-    return []
+    return GetDFWithFilter(filter)
 
 def ConvertDataToCSV():
     df = GetDataAsDf()
@@ -62,5 +57,3 @@ def WriteListToOutput(outputList, name, seperator=',', perline=True):
 
 if __name__ == "__main__":
     FetchAndConvertRemoteDataToCSV()
-    names = GetNamesWithAttendCountHigherThan(3)
-    WriteListToOutput(names, "biggerThan3.txt")

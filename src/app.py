@@ -1,7 +1,7 @@
 import streamlit as st
 from database import DataBase
-from fetch import GetNamesWithAttendCountHigherThan
-from consts import GetAdminAccessCode, GetBoothNameTable
+from fetch import GetUsersWithAttendedCountHigherThan
+from consts import GetAdminAccessCode, GetBoothNameTable, GetConferenceName, GetUsrDataCollectEntires
 
 class App:
     def __init__(self):
@@ -20,33 +20,38 @@ class App:
 
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
-        st.title("Welcome to UPGRADE!")
+        st.title(f"Welcome to {GetConferenceName()}!")
         boothDisplayName = boothName.replace("_"," ")
         st.subheader(f"You are at the {boothDisplayName} booth")
-        userName = st.text_input("Enter your name: ")
-        schoolName = st.text_input("Enter your school: ")
-        self.DisplayUserInfo(userName, schoolName)
+        userInfos = []
+        for userCol in GetUsrDataCollectEntires(): 
+            colInfo = st.text_input(f"Enter your {userCol.replace("_", " ")}: ")
+            userInfos.append(colInfo)
+
+        self.DisplayUserInfo(userInfos)
 
         if st.button("Register"):
-            if userName and schoolName:
-                st.text(f"Thank you for registering\n{userName}!")
-                self.dataBase.EnqueUserUpdate(userName, schoolName, boothName)
-            elif not userName:
-                st.text("name is empty, please fill in your name!")
+            invalidInfos = self.dataBase.GetInvalidInfos(userInfos)
+            if invalidInfos == []:  
+                st.text(f"Thank you for registering!")
+                self.dataBase.EnqueUserUpdate(userInfos, boothName)
             else:
-                st.text("school is empty, please fill in your school!")
+                invalidFields = ""
+                for invalidColIndex in invalidInfos:
+                    invalidFields += "\n" + GetUsrDataCollectEntires()[invalidColIndex].replace("_", " ")
+
+                st.text(f"please fill in the missing field: {invalidFields}")
 
         if st.button("refresh"):
             st.rerun()
     
-
-    def DisplayUserInfo(self, userName, schoolName):
-        recordDf = self.dataBase.GetUserRecordAsDataFrame(userName, schoolName)
+    def DisplayUserInfo(self, info):
+        recordDf = self.dataBase.GetUserRecordAsDataFrame(info)
         if recordDf.empty:
             st.subheader("Press Register to Start Your Journey!")
             return
 
-        visited, notVisited = self.dataBase.GetUserJourney(userName, schoolName)
+        visited, notVisited = self.dataBase.GetUserJourney(info)
         visited = [x.replace("_"," ") for x in visited]
         notVisited = [x.replace("_"," ") for x in notVisited]
         visitedDisplayText = '\n'.join(visited)
@@ -67,11 +72,8 @@ class App:
             st.rerun()
         st.dataframe(self.dataBase.GetDataAsDataFrame())
         number = st.number_input("Filter Total Visit Bigger Than or Equal to:", min_value = 0, value=7, step=1)
-        names = GetNamesWithAttendCountHigherThan(number-1)
-        namesDisplayText = ""
-        for name in names:
-            namesDisplayText += name + "\n"
-        st.text(namesDisplayText)
+        users = GetUsersWithAttendedCountHigherThan(number-1)
+        st.dataframe(users)
 
 app = App()
 app.Start()

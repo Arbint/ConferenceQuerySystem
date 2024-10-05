@@ -73,6 +73,14 @@ class DataBase:
 
         self.cursor.execute(f'CREATE TABLE IF NOT EXISTS {self.dtName} ({columnDefination})')
 
+    def GetInvalidInfos(self, info):
+        InvalidInfo = []
+        for i, inf in enumerate(info):
+            if inf == "":
+                InvalidInfo.append(i)
+
+        return InvalidInfo
+
     def GetRecord(self, info):
         query = self.BuildUserQuery()
         self.cursor.execute(query, tuple(info))
@@ -82,10 +90,10 @@ class DataBase:
     def BuildUserQuery(self):
         queryFilterList = []
         for col in GetUsrDataCollectEntires():
-            queryFilters.append(f" {col}=?")
+            queryFilterList.append(f" {col}=?")
 
         queryFilters = 'AND'.join(queryFilterList)
-        query = f'SELECT * FROM {self.dtName} WHERE {queryFilterList}'
+        query = f'SELECT * FROM {self.dtName} WHERE {queryFilters}'
         print(f"query is: {query}")
         return query
 
