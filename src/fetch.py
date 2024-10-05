@@ -1,6 +1,6 @@
 import subprocess
 import os
-from consts import GetScriptsDir, GetPrjDir, GetCSVOutputPath, GetBoothNameTable, GetOutputDir
+from consts import GetScriptsDir, GetCSVOutputPath, GetBoothNameTable, GetOutputDir, GetDataBasePath
 import sqlite3
 import pandas as pd
 
@@ -39,7 +39,7 @@ def FetchAndConvertRemoteDataToCSV():
     ConvertDataToCSV()
 
 def GetDfFromQuery(query):
-    dataPath = os.path.join(GetPrjDir(), 'data.db')
+    dataPath = GetDataBasePath() 
     if os.path.exists(dataPath):
         connection = sqlite3.connect(dataPath, check_same_thread=False)
         df = pd.read_sql_query(query, connection)

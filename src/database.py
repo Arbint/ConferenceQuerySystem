@@ -3,11 +3,11 @@ import os
 import pandas as pd
 import threading
 import queue
-from consts import GetBoothNameTable, GetPrjDir, GetCSVOutputPath
+from consts import GetBoothNameTable, GetDataBasePath, GetUsrDataCollectEntires
 
 class DataBase:
     def __init__(self):
-        dataBasePath = os.path.normpath(os.path.join(GetPrjDir(), 'data.db'))
+        dataBasePath = GetDataBasePath()
         self.connection = sqlite3.connect(dataBasePath, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.dtName=  "record"
@@ -21,8 +21,19 @@ class DataBase:
 
         self.CreateDataTable()
 
-    def EnqueUserUpdate(self, name, school, visitedBooth):
-        self.writeQueue.put([name, school, visitedBooth])
+    def EnqueUserUpdate(self, info, visitedBooth):
+        """
+        ## Called by front end to update or add a user
+        ***arguments:*** 
+        * info(list(str)): user name, and all other infomations like (school, occupation, from, etc), used to find a user or add a user
+        * visitedBooth(str): the booth the user has visited
+
+        ***return:***
+
+        None
+        """
+
+        self.writeQueue.put([info, visitedBooth])
         self.StartWriteThread()
 
     def StartWriteThread(self):
@@ -43,7 +54,7 @@ class DataBase:
             data = self.writeQueue.get()
             print(f"process queued data: {data}")
             try:
-                self.AddOrUpdateUser(data[0], data[1], data[2])
+                self.AddOrUpdateUser(data[0], data[1])
             except sqlite3.OperationalError as e:
                 print("=======================EORROR========================")
                 print(f"error during write operation: {e}")
@@ -52,24 +63,38 @@ class DataBase:
         self.StopWriteThread()
 
     def CreateDataTable(self):
-        columnDefination = f'''id INTEGER PRIMARY KEY AUTOINCREMENT,\nname TEXT,\nschool TEXT'''
+        columnDefination = f'''id INTEGER PRIMARY KEY AUTOINCREMENT'''
 
-        for boothName in self.boothNameTable.values():
+        for col in GetUsrDataCollectEntires():
+            columnDefination += f",\n{col} TEXT"
+
+        for boothName in self.GetBoothNames():
             columnDefination += f",\n{boothName} INTEGER"
 
         self.cursor.execute(f'CREATE TABLE IF NOT EXISTS {self.dtName} ({columnDefination})')
 
-    def GetRecord(self, name, school):
-        self.cursor.execute(f'SELECT * FROM {self.dtName} WHERE name = ? AND school= ?', (name,school,))
+    def GetRecord(self, info):
+        query = self.BuildUserQuery()
+        self.cursor.execute(query, tuple(info))
         user = self.cursor.fetchone()
         return user
 
-    def GetUserRecordAsDataFrame(self, name, school):
-        query = f"SELECT * FROM {self.dtName} WHERE name = ? AND school = ?"
-        return pd.read_sql_query(query, self.connection, params=(name,school, ))
+    def BuildUserQuery(self):
+        queryFilterList = []
+        for col in GetUsrDataCollectEntires():
+            queryFilters.append(f" {col}=?")
 
-    def GetUserJourney(self, name, school):
-        df = self.GetUserRecordAsDataFrame(name, school)
+        queryFilters = 'AND'.join(queryFilterList)
+        query = f'SELECT * FROM {self.dtName} WHERE {queryFilterList}'
+        print(f"query is: {query}")
+        return query
+
+    def GetUserRecordAsDataFrame(self, info):
+        query = self.BuildUserQuery() 
+        return pd.read_sql_query(query, self.connection, params=tuple(info))
+
+    def GetUserJourney(self, info):
+        df = self.GetUserRecordAsDataFrame(info)
         visited = []
         notVisited = self.GetBoothNames()
         if df.empty:
@@ -81,19 +106,18 @@ class DataBase:
                 notVisited.remove(boothName)
         return visited, notVisited
 
-    def AddOrUpdateUser(self, name, school, visitedBooth):
-        record = self.GetRecord(name, school)
+    def AddOrUpdateUser(self, info, visitedBooth):
+        record = self.GetRecord(info)
         if record:
-            self.UpdateUser(name, school, visitedBooth)
+            self.UpdateUser(info, visitedBooth)
         else:
-            self.AddUser(name, school, visitedBooth)
+            self.AddUser(info, visitedBooth)
 
-    def AddUser(self, name, school, visitedBooth):
-        if self.GetRecord(name, school):
+    def AddUser(self, info, visitedBooth):
+        if self.GetRecord(info):
             return
 
-        print(f"adding new user: {name} from {school}")
-        colNames = ["name", "school"]
+        colNames = GetUsrDataCollectEntires() 
         values = []
 
         boothNames = list(self.boothNameTable.values())
@@ -104,19 +128,28 @@ class DataBase:
             else:
                 values.append('0')
 
-        query = f'INSERT INTO {self.dtName} ({",".join(colNames)}) VALUES (?, ?, {",".join(values)})'
-        self.cursor.execute(query,(name,school,))
+        infoColValuesPlaceHolders = ""
+        for i in range(len(GetUsrDataCollectEntires())):
+            infoColValuesPlaceHolders += "?,"
+
+        query = f'INSERT INTO {self.dtName} ({",".join(colNames)}) VALUES ({infoColValuesPlaceHolders} {",".join(values)})'
+        self.cursor.execute(query,tuple(info))
         self.connection.commit()
 
     def GetBoothNames(self):
         return list(self.boothNameTable.values())
 
-    def UpdateUser(self, name, school, newVisitedBooth):
-        print(f"updating user: {name} with new booth: {newVisitedBooth}")
-        
-        query = f'UPDATE {self.dtName} SET {newVisitedBooth} = 1 WHERE name=? AND school=?'
+    def UpdateUser(self, info, newVisitedBooth):
+        queryFilterList = []
+        for col in GetUsrDataCollectEntires():
+            queryFilters.append(f" {col}=?")
+
+        queryFilters = 'AND'.join(queryFilterList)
+        query = f'UPDATE {self.dtName} Set {newVisitedBooth} = 1 WHERE {queryFilterList}'
+        print(f"query is: {query}")
+
         print(query)
-        self.cursor.execute(query, (name,school,))
+        self.cursor.execute(query, tuple(info))
         self.connection.commit()
 
     def GetDataAsDataFrame(self):

@@ -27,6 +27,9 @@ def GetCSVOutputPath():
 
     return os.path.normpath(os.path.join(path, "data.csv"))
 
+def GetDataBasePath():
+    return os.path.normpath(os.path.join(GetPrjDir(), "data.db"))
+
 def GetUsrDataCollectEntires():
     return ["name", "occupation"] 
 
