@@ -27,6 +27,9 @@ def GetCSVOutputPath():
 
     return os.path.normpath(os.path.join(path, "data.csv"))
 
+def GetUsrDataCollectEntires():
+    return ["name", "occupation"] 
+
 def GetBoothNameTable():
     return {
             'caf414ad66ab482c':"Ballroom_Animation",
