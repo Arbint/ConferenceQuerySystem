@@ -84,6 +84,14 @@ docker-compose up
 
 you can also do the same with the provided ```dockerComposeReBuildAndLaunch.sh```
 
+## Generate QR Code:
+
+you can use the qrCodeGen.py to generate qrcode. be sure to set the correct server public ip, in the ```def GetServerURL():```
+```py
+def GetServerURL():
+    return "http://your.server.ip:8501"
+```
+
 ## Notes for deploying to AWS EC2
 
 * Use AWS-Linus as the OS
@@ -116,6 +124,11 @@ you can also do the same with the provided ```dockerComposeReBuildAndLaunch.sh``
     sudo chmod +x /usr/local/bin/docker-compose
     ```
 
+```NOTE``` If at this point, docker daemon is not running, simply do:
+```sh
+systemctrl start docker
+```
+
 * to access server with the key:
 
 ```sh
@@ -145,3 +158,4 @@ these 2 can be achieved by navigating to scripts.and run:
 ```sh
 ./copyDataToLocal.sh
 ```
+

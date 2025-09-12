@@ -59,7 +59,8 @@ def GenerateAllQrCodes():
     GenerateQrCode("Admin",data)
 
 def GetServerURL():
-    return "http://3.137.157.79:8501"
+    # return "http://3.137.157.79:8501"
+    return "http://127.0.0.1:8501"
 
 def GetExistingQrCodes():
     qrCodeNames = os.listdir(GetQrCodeOutputPath())
