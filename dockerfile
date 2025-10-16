@@ -1,20 +1,30 @@
 FROM python:3.12-slim
 
+# Set the working directory
+WORKDIR /app/src/
+
 # Install required system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install streamlit
-RUN pip install streamlit
+# Poetry Install
+ENV POETRY_VERSION=2.1.3 \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1
+
+RUN pip install "poetry==$POETRY_VERSION"
+
+# Copy only dependency files first (for caching)
+COPY pyproject.toml poetry.lock ./
+
+RUN poety install  --no-root --no-dev
+
+COPY assets ./assets
+COPY src ./src
 
 # Expose the default streamlit port
 EXPOSE 8501
 
-# Set the working directory
-WORKDIR /app/src/
-
-COPY . /app/src/
-
-#Command to run the Stremlit App
-ENTRYPOINT ["streamlit", "run", "app.py"]
+#Command to launch the server
+ENTRYPOINT ["poetry", "run", "launchserver"]

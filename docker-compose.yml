@@ -9,5 +9,5 @@ services:
     ports:
       - '8501:8501/udp'
       - '8501:8501/tcp'
-    command: ["streamlit", "run", "app.py"]
+    command: ["poetry", "run", "launchserver"]
 
