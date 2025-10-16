@@ -18,10 +18,12 @@ RUN pip install "poetry==$POETRY_VERSION"
 # Copy only dependency files first (for caching)
 COPY pyproject.toml poetry.lock ./
 
-RUN poety install  --no-root --no-dev
-
 COPY assets ./assets
 COPY src ./src
+COPY README.md ./README.md
+
+RUN poetry lock
+RUN poetry install
 
 # Expose the default streamlit port
 EXPOSE 8501

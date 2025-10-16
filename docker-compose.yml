@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   upgradeboothregister:
-    build: ./src
+    build: .
     image: upgradeboothregister
     container_name: upgradeboothregister
     volumes:
