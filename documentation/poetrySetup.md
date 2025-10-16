@@ -50,6 +50,7 @@ Go to the generated ```pyproject.toml``` file, and configure your project to you
         ```toml
         [tool.poetry.scripts]
         qrcodegen = "conferencequerysystem.qrCodeGen:main"
+        launchserver = "conferencequerysystem.cli:LaunchStreamlitServer"
         ```
         this is saying: there is a command called ```qrcodegen```, when executed, call, the ```main``` function defined in the ```qrCodeGen.py``` file under the ```conferencequerysystem``` module.
 

@@ -158,4 +158,3 @@ these 2 can be achieved by navigating to scripts.and run:
 ```sh
 ./copyDataToLocal.sh
 ```
-
