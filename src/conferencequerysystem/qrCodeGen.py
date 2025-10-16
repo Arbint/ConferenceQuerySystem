@@ -138,7 +138,12 @@ def CombineQrCodeIntoImage(numOfColums = 3):
 
     combinedImage.save(os.path.join(GetQrCodeOutputPath(), "allQrCodes.png"))
 
-if __name__ == "__main__":
+
+def main():
     RemovePreviousQrCodes()
     GenerateAllQrCodes()
     CombineQrCodeIntoImage()
+
+
+if __name__ == "__main__":
+    main()

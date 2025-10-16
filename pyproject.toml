@@ -1,0 +1,27 @@
+[project]
+name = "conferencequerysystem"
+version = "0.2.0"
+description = "A conference query system that is able to generate qr code for each room, and allow user to register, and check which room they have visited."
+authors = [
+    {name = "Jingtian Li (jili1@uiwtx.edu)"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = "=3.12.10"
+dependencies = [
+    "streamlit==1.38.0",
+    "qrcode==8.0",
+    "pillow==10.4.0",
+]
+
+[tool.poetry]
+packages = [
+    {include = "conferencequerysystem", from="src"}
+]
+
+[tool.poetry.scripts]
+qrcodegen = "conferencequerysystem.qrCodeGen:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
