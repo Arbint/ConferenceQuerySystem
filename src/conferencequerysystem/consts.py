@@ -1,5 +1,11 @@
 import os
 from pathlib import Path
+from enum import Enum
+
+class ECompetitionSubmitType(Enum):
+    Photo = 1
+    Video = 2
+    NoType = 3
 
 def GetConferenceName():
     return "UPGRADE"
@@ -66,9 +72,17 @@ def GetBoothNameTable():
             'b20e98164a4df71d':"Programming_Demo"
     }
 
-def IsInteractive(boothName):
-    return "Interactive" in boothName and "Programming" not in boothName 
+def GetCompetitionType(boothName):
+    if boothName in GetCompetitionBoothInfo():
+        return GetCompetitionBoothInfo()[boothName]
 
+    return ECompetitionSubmitType.NoType
+
+def GetCompetitionBoothInfo():
+    return {
+                "Modeling_Interactive": ECompetitionSubmitType.Photo,
+                "Animation_Interactive": ECompetitionSubmitType.Video
+           }
 
 def GetAdminAccessCode():
     return "ANGD4444UPGRADEVICTORIA"
