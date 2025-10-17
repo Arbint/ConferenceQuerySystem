@@ -46,17 +46,6 @@ class App:
         if st.button("refresh"):
             st.rerun()
 
-        # TODO: make the photo taking work?
-        # if IsInteractive(boothName):
-        #     st.subheader(f"submit your interactive work & win a prize!")
-        #     st.text(f"how it works:")
-        #     st.text(f"1, finish your interactive work\n2, Take a photo:")
-        #     if st.button("Take Photo"):
-        #         imageFileBuffer = st.camera_input("Take a picture")  
-        #         if(imageFileBuffer is not None):
-        #             image = Image.open(imageFileBuffer)
-        #             st.image(image, caption="your entry", use_column_width=True)
-
     def DisplayUserInfo(self, info):
         recordDf = self.dataBase.GetUserRecordAsDataFrame(info)
         if recordDf.empty:
