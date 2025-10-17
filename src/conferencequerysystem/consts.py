@@ -53,8 +53,14 @@ def GetCSVOutputPath():
 
     return os.path.normpath(os.path.join(path, "data.csv"))
 
+def GetDataStorageRootDir():
+    return os.path.normpath(os.path.join(GetPrjDir(), "data"))
+
 def GetDataBasePath():
-    return os.path.normpath(os.path.join(GetPrjDir(), "data.db"))
+    return os.path.normpath(os.path.join(GetDataStorageRootDir(), "data.db"))
+
+def GetUnstructuredDataSaveDir():
+    return os.path.normpath(os.path.join(GetDataStorageRootDir(), "unstructured"))
 
 def GetUsrDataCollectEntires():
     return ["name", "school", "occupation"]

@@ -2,6 +2,7 @@ venv/
 .venv/
 __pycache__/
 output/
+data/
 .DS_Store
 data.db
 *.pem
