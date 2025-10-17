@@ -1,149 +1,176 @@
 import qrcode
 import os
 from conferencequerysystem.consts import GetBoothNameTable, GetOutputDir, GetAdminAccessCode, GetAssetDir
+from conferencequerysystem.utilities import GetURLFromUser
 from PIL import Image, ImageOps
 import math
+import sys
 
-def GetQRCodeIconColorForName(name):
-    if name == "Animation_Demo":
-        return "#C10808"
-    if name == "Animation_Interactive":
-        return "#ff8989"
-    if name == "Modeling_Demo":
-        return "#239b56"
-    if name == "Modeling_Interactive":
-        return "#8aff80"
-    if name == "Ballroom_Animation":
-        return "#008fff"
-    if name == "Ballroom_Modeling":
-        return "#fbff00"
-    if name == "Ballroom_Programming":
-        return "#9e4eff"
-    
-    return "#bcbcbc"
 
-def GetQrCodeAssetPath():
-    path = os.path.join(GetAssetDir(), "qrcodeIcons") 
-    path = os.path.normpath(path)
-    if not os.path.exists(path):
-        os.mkdir(path)
+class QRCodeGen:
+    def __init__(self, serverURL):
+        #TODO: Should maybe refactor this to be always aligned with the booth names defined in the const.py
+        self.qrCodeIconColorDict = {
+            "Animation_Demo": "#C10808",
+            "Animation_Interactive":"#ff8989",
 
-    return path
+            "Modeling_Demo": "#239b56",
+            "Modeling_Interactive":"#8aff80",
 
-def GetQrCodeOutputPath():
-    path = os.path.join(GetOutputDir(), "qrcodes")
-    path = os.path.normpath(path)
-    if not os.path.exists(path):
-        os.mkdir(path)
+            "Programming_Demo": "#3d6ced",
+            "Programming_Interactive":"#74b8f5",
 
-    return path
+            "Ballroom_Animation": "#0cc1e7",
+            "Ballroom_Modeling": "#fbff00",
+            "Ballroom_Programming": "#9e4eff",
 
-def GetIconWithName(name):
-    path = os.path.join(GetQrCodeAssetPath(), name+".png")
-    if os.path.exists(path):
+            "Admin": "#bcbcbc",
+            "Default": "#ff00aa"
+        }
+
+        self.severURL = serverURL
+
+    def SetServerURL(self, newURL): 
+        self.severURL = newURL
+
+    def GetQRCodeIconColorForName(self, name):
+        if name in self.qrCodeIconColorDict:
+            return self.qrCodeIconColorDict[name]
+
+        return self.qrCodeIconColorDict["Default"]
+
+    def GetQrCodeAssetPath(self):
+        path = os.path.join(GetAssetDir(), "qrcodeIcons") 
+        path = os.path.normpath(path)
+        if not os.path.exists(path):
+            os.mkdir(path)
+
         return path
-    return None
-    
-def GetDefaultIconPath():
-    path = os.path.join(GetQrCodeAssetPath(), "Default.png")
-    if os.path.exists(path):
-        return os.path.normpath(path)
-    return None
 
-def GenerateAllQrCodes():
-    for code, boothName in GetBoothNameTable().items():
-        data = f"{GetServerURL()}/?c={code}"
-        GenerateQrCode(boothName, data)
+    def GetQrCodeOutputPath(self):
+        path = os.path.join(GetOutputDir(), "qrcodes")
+        path = os.path.normpath(path)
+        if not os.path.exists(path):
+            os.mkdir(path)
 
-    data = f"{GetServerURL()}/?c={GetAdminAccessCode()}"
-    GenerateQrCode("Admin",data)
+        return path
 
-def GetServerURL():
-    #return "http://3.137.157.79:8501"
-    #return "http://127.0.0.1:8501"
-    return "http://192.168.1.75:8501"
+    def GetIconWithName(self, name):
+        path = os.path.join(self.GetQrCodeAssetPath(), name+".png")
+        if os.path.exists(path):
+            return path
+        return None
+        
+    def GetDefaultIconPath(self):
+        path = os.path.join(self.GetQrCodeAssetPath(), "Default.png")
+        if os.path.exists(path):
+            return os.path.normpath(path)
+        return None
 
-def GetExistingQrCodes():
-    qrCodeNames = os.listdir(GetQrCodeOutputPath())
-    qrCodePaths = []
-    for name in qrCodeNames:
-        qrCodePath = os.path.join(GetQrCodeOutputPath(), name)
-        qrCodePaths.append(os.path.normpath(qrCodePath))
+    def GenerateAllQrCodes(self):
+        print(f"generating qrcode with base url: {self.severURL}")
+        for code, boothName in GetBoothNameTable().items():
+            data = f"{self.GetServerURL()}/?c={code}"
+            self.GenerateQrCode(boothName, data)
 
-    return qrCodePaths
+        data = f"{self.GetServerURL()}/?c={GetAdminAccessCode()}"
+        self.GenerateQrCode("Admin",data)
 
-def RemovePreviousQrCodes():
-    for qrCode in GetExistingQrCodes():
-        if not os.path.isdir(qrCode):
-            os.remove(qrCode)
-    
-def GenerateQrCode(codeFileName, data):
-    
-    # Create a QR code object
-    qr = qrcode.QRCode(
-        version=2,  # controls the size of the QR Code (1 is the smallest)
-        error_correction=qrcode.constants.ERROR_CORRECT_H,  # controls error correction
-        box_size=40,  # size of the box where QR code will be displayed
-        border=4,  # border size around the QR code
-    )
+    def GetServerURL(self):
+        return self.severURL
 
-    # Add data to the QR code
-    qr.add_data(data)
-    qr.make(fit=True)
+    def GetExistingQrCodes(self):
+        qrCodeNames = os.listdir(self.GetQrCodeOutputPath())
+        qrCodePaths = []
+        for name in qrCodeNames:
+            qrCodePath = os.path.join(self.GetQrCodeOutputPath(), name)
+            qrCodePaths.append(os.path.normpath(qrCodePath))
 
-    # Create an image from the QR code
-    qrCodeImg = qr.make_image(fill="black", back_color="white").convert("RGB")
+        return qrCodePaths
 
-    # Find and attach Icon
-    iconPath = GetIconWithName(codeFileName)
-    if not iconPath:
-        iconPath = GetDefaultIconPath()
+    def RemovePreviousQrCodes(self):
+        for qrCode in self.GetExistingQrCodes():
+            if not os.path.isdir(qrCode):
+                os.remove(qrCode)
+        
+    def GenerateQrCode(self,codeFileName, data):
+        
+        # Create a QR code object
+        qr = qrcode.QRCode(
+            version=2,  # controls the size of the QR Code (1 is the smallest)
+            error_correction=qrcode.constants.ERROR_CORRECT_H,  # controls error correction
+            box_size=40,  # size of the box where QR code will be displayed
+            border=4,  # border size around the QR code
+        )
 
-    if iconPath:
-        qrCodeCenterIcon = Image.open(iconPath)
-        borderSize = 40
-        qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill=GetQRCodeIconColorForName(codeFileName))
-        qrWidth, qrHeight = qrCodeImg.size
-        iconSize = qrWidth//4
-        qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize), Image.Resampling.LANCZOS)
-        iconPos = ((qrWidth - iconSize)//2, (qrHeight - iconSize)//2)
-        qrCodeImg.paste(qrCodeCenterIcon, iconPos, mask = qrCodeCenterIcon)
+        # Add data to the QR code
+        qr.add_data(data)
+        qr.make(fit=True)
 
-    # Save the image file
-    qrCodeImg.save(os.path.join(GetQrCodeOutputPath(), codeFileName+".png"))
+        # Create an image from the QR code
+        qrCodeImg = qr.make_image(fill="black", back_color="white").convert("RGB")
 
-def CombineQrCodesIntoPdf():
-    qrCodePaths = GetExistingQrCodes()
-    images = [Image.open(image) for image in qrCodePaths]
-    images[0].save(os.path.join(GetQrCodeOutputPath(),'allQrCodes.pdf'), save_all=True, append_images=images[1:])
+        # Find and attach Icon
+        iconPath = self.GetIconWithName(codeFileName)
+        if not iconPath:
+            iconPath = self.GetDefaultIconPath()
 
-def CombineQrCodeIntoImage(numOfColums = 3):
-    qrCodePaths = GetExistingQrCodes()
-    images = [Image.open(image) for image in qrCodePaths]
+        if iconPath:
+            qrCodeCenterIcon = Image.open(iconPath)
+            borderSize = 40
+            qrCodeCenterIcon = ImageOps.expand(qrCodeCenterIcon, border=borderSize, fill=self.GetQRCodeIconColorForName(codeFileName))
+            qrWidth, qrHeight = qrCodeImg.size
+            iconSize = qrWidth//4
+            qrCodeCenterIcon = qrCodeCenterIcon.resize((iconSize, iconSize), Image.Resampling.LANCZOS)
+            iconPos = ((qrWidth - iconSize)//2, (qrHeight - iconSize)//2)
+            qrCodeImg.paste(qrCodeCenterIcon, iconPos, mask = qrCodeCenterIcon)
 
-    imageCount = len(images)
-    numOfRows = math.ceil(imageCount / numOfColums)
+        # Save the image file
+        qrCodeImg.save(os.path.join(self.GetQrCodeOutputPath(), codeFileName+".png"))
 
-    totalWidth = max(img.width for img in images) * numOfColums
-    totalHeight = max(img.width for img in images) * numOfRows
+    def CombineQrCodesIntoPdf(self):
+        qrCodePaths = self.GetExistingQrCodes()
+        images = [Image.open(image) for image in qrCodePaths]
+        images[0].save(os.path.join(self.GetQrCodeOutputPath(),'allQrCodes.pdf'), save_all=True, append_images=images[1:])
 
-    combinedImage = Image.new("RGB", (totalWidth, totalHeight), color = (255,255,255))
+    def CombineQrCodeIntoImage(self, numOfColums = 3):
+        qrCodePaths = self.GetExistingQrCodes()
+        images = [Image.open(image) for image in qrCodePaths]
 
-    currentIndex = 0
-    for y in range(numOfRows):
-        for x in range(numOfColums):
-            if currentIndex < len(images):
-                image = images[currentIndex]
-                combinedImage.paste(image, (x * image.width, y * image.height))
-                currentIndex+=1
+        imageCount = len(images)
+        numOfRows = math.ceil(imageCount / numOfColums)
 
-    combinedImage.save(os.path.join(GetQrCodeOutputPath(), "allQrCodes.png"))
+        totalWidth = max(img.width for img in images) * numOfColums
+        totalHeight = max(img.width for img in images) * numOfRows
+
+        combinedImage = Image.new("RGB", (totalWidth, totalHeight), color = (255,255,255))
+
+        currentIndex = 0
+        for y in range(numOfRows):
+            for x in range(numOfColums):
+                if currentIndex < len(images):
+                    image = images[currentIndex]
+                    combinedImage.paste(image, (x * image.width, y * image.height))
+                    currentIndex+=1
+
+        combinedImage.save(os.path.join(self.GetQrCodeOutputPath(), "allQrCodes.png"))
 
 
 def main():
-    RemovePreviousQrCodes()
-    GenerateAllQrCodes()
-    CombineQrCodeIntoImage()
+    # local testing url is: http://192.168.1.75:8501
+    args = sys.argv
+    print(args)
+
+    url = ""
+    if len(args)>1:
+        url = args[1]
+    else:
+        url = GetURLFromUser()
+
+    generator = QRCodeGen(url)
+    generator.RemovePreviousQrCodes()
+    generator.GenerateAllQrCodes()
+    generator.CombineQrCodeIntoImage()
 
 
 if __name__ == "__main__":
