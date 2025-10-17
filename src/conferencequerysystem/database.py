@@ -46,7 +46,7 @@ class DataBase:
     def StopWriteThread(self):
         with self.threadLock:
             if self.writeQueue.empty() and self.queueThread.is_alive():
-                self.worker_thread = None
+                self.writeQueue = None
                 print("stoping write thread!")
         
     def ProcessQueue(self):
@@ -90,9 +90,9 @@ class DataBase:
     def BuildUserQuery(self):
         queryFilterList = []
         for col in GetUsrDataCollectEntires():
-            queryFilterList.append(f" {col}=?")
+            queryFilterList.append(f"{col}=?")
 
-        queryFilters = 'AND'.join(queryFilterList)
+        queryFilters = ' AND '.join(queryFilterList)
         query = f'SELECT * FROM {self.dtName} WHERE {queryFilters}'
         print(f"query is: {query}")
         return query
@@ -126,21 +126,21 @@ class DataBase:
             return
 
         colNames = GetUsrDataCollectEntires() 
-        values = []
+        boothVisitedRecord = []
 
         boothNames = list(self.boothNameTable.values())
         for boothName in boothNames: 
             colNames.append(boothName)
             if boothName == visitedBooth:
-                values.append('1')
+                boothVisitedRecord.append('1')
             else:
-                values.append('0')
+                boothVisitedRecord.append('0')
 
         infoColValuesPlaceHolders = ""
         for i in range(len(GetUsrDataCollectEntires())):
             infoColValuesPlaceHolders += "?,"
 
-        query = f'INSERT INTO {self.dtName} ({",".join(colNames)}) VALUES ({infoColValuesPlaceHolders} {",".join(values)})'
+        query = f'INSERT INTO {self.dtName} ({",".join(colNames)}) VALUES ({infoColValuesPlaceHolders} {",".join(boothVisitedRecord)})'
         self.cursor.execute(query,tuple(info))
         self.connection.commit()
 
@@ -150,10 +150,10 @@ class DataBase:
     def UpdateUser(self, info, newVisitedBooth):
         queryFilterList = []
         for col in GetUsrDataCollectEntires():
-            queryFilters.append(f" {col}=?")
+            queryFilterList.append(f" {col}=?")
 
-        queryFilters = 'AND'.join(queryFilterList)
-        query = f'UPDATE {self.dtName} Set {newVisitedBooth} = 1 WHERE {queryFilterList}'
+        queryFilters = ' AND '.join(queryFilterList)
+        query = f'UPDATE {self.dtName} Set {newVisitedBooth} = 1 WHERE {queryFilters}'
         print(f"query is: {query}")
 
         print(query)

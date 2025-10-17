@@ -57,7 +57,7 @@ def GetDataBasePath():
     return os.path.normpath(os.path.join(GetPrjDir(), "data.db"))
 
 def GetUsrDataCollectEntires():
-    return ["name", "school", "occupation"] 
+    return ["name", "school", "occupation"]
 
 def GetBoothNameTable():
     return {
