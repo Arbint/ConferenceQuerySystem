@@ -114,6 +114,13 @@ class DataBase:
                 notVisited.remove(boothName)
         return visited, notVisited
 
+    def HasUser(self, info):
+        if self.GetRecord(info):
+            return True
+
+        return False
+
+
     def AddOrUpdateUser(self, info, visitedBooth):
         record = self.GetRecord(info)
         if record:
