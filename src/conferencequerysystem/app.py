@@ -1,7 +1,8 @@
 import streamlit as st
-from database import DataBase
-from fetch import GetUsersWithAttendedCountHigherThan
-from consts import GetAdminAccessCode, GetBoothNameTable, GetConferenceName, GetUsrDataCollectEntires
+from conferencequerysystem.database import DataBase
+from conferencequerysystem.fetch import GetUsersWithAttendedCountHigherThan
+from conferencequerysystem.consts import GetAdminAccessCode, GetBoothNameTable, GetConferenceName, GetUsrDataCollectEntires, IsInteractive
+from PIL import Image
 
 class App:
     def __init__(self):
@@ -44,7 +45,18 @@ class App:
 
         if st.button("refresh"):
             st.rerun()
-    
+
+        # TODO: make the photo taking work?
+        # if IsInteractive(boothName):
+        #     st.subheader(f"submit your interactive work & win a prize!")
+        #     st.text(f"how it works:")
+        #     st.text(f"1, finish your interactive work\n2, Take a photo:")
+        #     if st.button("Take Photo"):
+        #         imageFileBuffer = st.camera_input("Take a picture")  
+        #         if(imageFileBuffer is not None):
+        #             image = Image.open(imageFileBuffer)
+        #             st.image(image, caption="your entry", use_column_width=True)
+
     def DisplayUserInfo(self, info):
         recordDf = self.dataBase.GetUserRecordAsDataFrame(info)
         if recordDf.empty:

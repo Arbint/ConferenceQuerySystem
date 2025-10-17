@@ -61,8 +61,14 @@ def GetBoothNameTable():
             '9345b7ac1ebf36fb':"Animation_Interactive",
             '3b35daf3e310fbbe':"Animation_Demo",
             '393d01f7ce7ee1a4':"Modeling_Interactive",
-            'b20e98164a4df71d':"Modeling_Demo"
+            'b20e98164a4df71d':"Modeling_Demo",
+            '2d6c9859a3a15919':"Programming_Interactive",
+            'b20e98164a4df71d':"Programming_Demo"
     }
+
+def IsInteractive(boothName):
+    return "Interactive" in boothName and "Programming" not in boothName 
+
 
 def GetAdminAccessCode():
     return "ANGD4444UPGRADEVICTORIA"

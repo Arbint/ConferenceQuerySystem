@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import threading
 import queue
-from consts import GetBoothNameTable, GetDataBasePath, GetUsrDataCollectEntires
+from conferencequerysystem.consts import GetBoothNameTable, GetDataBasePath, GetUsrDataCollectEntires
 
 class DataBase:
     def __init__(self):
