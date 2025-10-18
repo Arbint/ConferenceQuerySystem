@@ -66,6 +66,9 @@ class App:
 
     def ShowCompetitionWidget(self, userInfos, boothName):
         competitionType = GetCompetitionType(boothName)
+        if competitionType == ECompetitionSubmitType.NoType:
+            return
+
         st.subheader(f"submit your interactive work & win a prize!")
         st.text(f"how it works:")
         st.text(f"1,Finish your interactive work")

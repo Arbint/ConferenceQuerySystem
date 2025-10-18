@@ -39,6 +39,9 @@ class UnstructuredDataSaveUtility:
         return saveDir
 
     def SaveSubmission(self, fileSubmission: FileSubmission):
+        if fileSubmission.fileType == EFileSubmissionSaveType.NoType:
+            return
+
         tmp_path = fileSubmission.savePath + ".part"
         with open(tmp_path, "wb") as f:
             f.write(fileSubmission.buffer)
