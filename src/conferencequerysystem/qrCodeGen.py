@@ -4,7 +4,8 @@ from conferencequerysystem.consts import GetBoothNameTable, GetOutputDir, GetAdm
 from conferencequerysystem.utilities import GetURLFromUser
 from PIL import Image, ImageOps
 import math
-import sys
+from pathlib import Path
+from pyzbar.pyzbar import decode
 
 
 class QRCodeGen:
@@ -31,6 +32,7 @@ class QRCodeGen:
         self.clientURL = clientURL
         self.adminURL = adminURL
         self.submissionServerURL = submissionServerURL
+        self.qrCodeURLFileName = "urls.txt"
 
     def GetQRCodeIconColorForName(self, name):
         if name in self.qrCodeIconColorDict:
@@ -134,7 +136,7 @@ class QRCodeGen:
 
     def CombineQrCodeIntoImage(self, numOfColums = 3):
         qrCodePaths = self.GetExistingQrCodes()
-        images = [Image.open(image) for image in qrCodePaths]
+        images = [Image.open(image) for image in qrCodePaths if "png" in image]
 
         imageCount = len(images)
         numOfRows = math.ceil(imageCount / numOfColums)
@@ -154,6 +156,35 @@ class QRCodeGen:
 
         combinedImage.save(os.path.join(self.GetQrCodeOutputPath(), "allQrCodes.png"))
 
+    def GetOutputURLsTextFilePath(self):
+        ouputFilePath = os.path.normpath(os.path.join(self.GetQrCodeOutputPath(), self.qrCodeURLFileName))
+        return ouputFilePath
+
+    def WriteURLsToFile(self):
+        with open(self.GetOutputURLsTextFilePath(), "wt") as f:
+            qrCodePaths = self.GetExistingQrCodes()
+            for qrCodePath in qrCodePaths:
+                ext = Path(qrCodePath).suffix
+                if "png" not in ext:
+                    continue
+
+                urlName = Path(qrCodePath).stem
+                f.writelines(f"{urlName}:\n")
+                qrCodeImage = Image.open(qrCodePath)
+                decodeResults = decode(qrCodeImage)
+                for decodedQrCode in decodeResults:
+                    url = decodedQrCode.data.decode("utf-8")
+                    print(f"found url: {url} for {urlName}")
+                    f.writelines(f"{url}\n")
+
+                f.writelines("\n")
+
+
+
+
+
+
+
 
 def main():
     # the url should be the url with port intergrated:
@@ -172,6 +203,7 @@ def main():
     generator = QRCodeGen(clientURL, adminURL, submissionURL)
     generator.RemovePreviousQrCodes()
     generator.GenerateAllQrCodes()
+    generator.WriteURLsToFile()
     generator.CombineQrCodeIntoImage()
 
 
