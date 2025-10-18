@@ -1,6 +1,6 @@
 # Conference Query System
 
-<img src="documentation/documentationAssets/frontend.png" width = 400><img src="documentation/documentationAssets/admin.png" width = 400>
+<img src="documentation/documentationAssets/frontend.png" width = 400> <img src="documentation/documentationAssets/admin.png" width = 400>
 
 ## Features
 
@@ -8,11 +8,13 @@ This conference query system can be used to keep track of the various booths the
 
 It has the following features:
 
-* Allowing flexiable amout of booths being configured.
+* Allowing flexible amout of booths being configured.
 
 * Track what booths a participant has visitied.
 
 * Track the total amout of boothes a participant has visited.
+
+* Allow participant to upload videos and photos to the booth they are at.
 
 * Generate QR Code Automatically for each booth.
 
@@ -22,15 +24,20 @@ It has the following features:
 
 * Has utility functions to retrieve data from server to local machine, and generate csv
 
+* has the submission page to view submissions for each booth
+
 ## Technology
 
-This system is developed with ```python```, it uses ```Streamlit``` as the front end, and ```sqlite3``` as the back end database. It can be deployed on any system, and can generate qr code for the boothes with the ```qrcode``` and ```pillow``` library.
+This system is developed with ```python```, and managed with ```poetry```. 
+
+It uses ```Streamlit``` as the front end, and ```sqlite3``` as the back end database. It can be deployed on any system, and can generate qr code for the boothes with the ```qrcode``` and ```pillow``` library.
 
 * versions:
 
 |library  | version |
 |---------|---------|
 |Python   |  3.12.6 |
+|poetry   |  2.1.3  |
 |Streamlit|  1.38.0 |
 |Sqlite3  |  3.46.1 |
 |Pillow   |  10.4.0 |
@@ -40,9 +47,15 @@ This system is developed with ```python```, it uses ```Streamlit``` as the front
 
 The system has 5 major modules:
 
-* The app module ```app.py```
+* The client modules ```userClient.py```, ```adminClient.py```, ```submissionViewClient.py```
 
-    this module uses the streamlit libaray to display the greetings, ask for user info, and allows the user to register and check their current status (what booth they have and haven't visited)
+    these module uses the streamlit libaray as the front ends of the application
+
+    |client  | usage |
+    |---------|---------|
+    |userClient  |  display greeting to users, allow registeration,show status, and upload photos/videos|
+    |adminClient   |  for the administrators to check participations |
+    |submissionViewClient|  for people to view uploaded photos/videos |
 
 * The database module ```database.py```
 
@@ -66,6 +79,8 @@ The system has 5 major modules:
 * the fetch module ```fetch.py```
 
     this module has functions to copy data from the remote server to local machine, as well as doing filtering to the data, generate csv file, it is also used by the admin front end to filter users by booth count.
+
+    ```NOTE``` the fetch module may not be able to fetch uploaded videos and photos.
 
 ## Deploy
 

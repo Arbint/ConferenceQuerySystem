@@ -1,6 +1,6 @@
 import subprocess
 import os
-from consts import GetScriptsDir, GetCSVOutputPath, GetBoothNameTable, GetOutputDir, GetDataBasePath
+from conferencequerysystem.consts import GetScriptsDir, GetCSVOutputPath, GetBoothNameTable, GetOutputDir, GetDataBasePath
 import sqlite3
 import pandas as pd
 
