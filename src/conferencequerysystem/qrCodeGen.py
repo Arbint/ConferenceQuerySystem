@@ -8,7 +8,7 @@ import sys
 
 
 class QRCodeGen:
-    def __init__(self, serverURL):
+    def __init__(self,clientURL, adminURL, submissionServerURL):
         #TODO: Should maybe refactor this to be always aligned with the booth names defined in the const.py
         self.qrCodeIconColorDict = {
             "Animation_Demo": "#C10808",
@@ -28,10 +28,9 @@ class QRCodeGen:
             "Default": "#ff00aa"
         }
 
-        self.severURL = serverURL
-
-    def SetServerURL(self, newURL): 
-        self.severURL = newURL
+        self.clientURL = clientURL
+        self.adminURL = adminURL
+        self.submissionServerURL = submissionServerURL
 
     def GetQRCodeIconColorForName(self, name):
         if name in self.qrCodeIconColorDict:
@@ -68,16 +67,16 @@ class QRCodeGen:
         return None
 
     def GenerateAllQrCodes(self):
-        print(f"generating qrcode with base url: {self.severURL}")
+        print(f"Generating QR Codes with:\nadminURL: {self.adminURL}\nclientURL: {self.clientURL}\nsubmissionURL: {self.submissionServerURL}")
         for code, boothName in GetBoothNameTable().items():
-            data = f"{self.GetServerURL()}/?c={code}"
+            data = f"{self.clientURL}/?c={code}"
             self.GenerateQrCode(boothName, data)
 
-        data = f"{self.GetServerURL()}/?c={GetAdminAccessCode()}"
+        data = f"{self.adminURL}/?c={GetAdminAccessCode()}"
         self.GenerateQrCode("Admin",data)
 
-    def GetServerURL(self):
-        return self.severURL
+        data = f"{self.submissionServerURL}/?c={GetAdminAccessCode()}"
+        self.GenerateQrCode("Submissions", data)
 
     def GetExistingQrCodes(self):
         qrCodeNames = os.listdir(self.GetQrCodeOutputPath())
@@ -157,17 +156,15 @@ class QRCodeGen:
 
 
 def main():
-    # local testing url is: http://192.168.1.75:8501
-    args = sys.argv
-    print(args)
+    # the url should be the url with port intergrated:
+    # http://192.168.1.91:8501
+    # if the port is intergrated with the url like the ones you would get from cloudflared tunneling,then only the tunneled url is requred.
 
-    url = ""
-    if len(args)>1:
-        url = args[1]
-    else:
-        url = GetURLFromUser()
+    clientURL = GetURLFromUser("Client Server URL")
+    adminURL = GetURLFromUser("admin Server URL")
+    submissionURL = GetURLFromUser("submission Server URL")
 
-    generator = QRCodeGen(url)
+    generator = QRCodeGen(clientURL, adminURL, submissionURL)
     generator.RemovePreviousQrCodes()
     generator.GenerateAllQrCodes()
     generator.CombineQrCodeIntoImage()

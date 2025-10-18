@@ -110,3 +110,13 @@ def GetAllowedExtensions(competitionType: ECompetitionSubmitType):
 
 def GetAdminAccessCode():
     return "ANGD4444UPGRADEVICTORIA"
+
+
+def GetClientServerPort():
+    return "8501"
+
+def GetAdminServerPort():
+    return "8502"
+
+def GetSubmissionServerPort():
+    return "8503"

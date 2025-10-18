@@ -22,7 +22,7 @@ packages = [
 
 [tool.poetry.scripts]
 qrcodegen = "conferencequerysystem.qrCodeGen:main"
-launchserver = "conferencequerysystem.cli:LaunchStreamlitServer"
+launchserver = "conferencequerysystem.cli:LaunchStreamlitServers"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

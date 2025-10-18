@@ -19,10 +19,10 @@ def IsValidURL(url):
         return False
     
 
-def GetURLFromUser():
-    url = AskForURL() 
+def GetURLFromUser(msg: str):
+    url = AskForURL(msg) 
     while not IsValidURL(url):
-        url = AskForURL("Invalid URL")
+        url = AskForURL(f"Invalid URL!\n{msg}")
 
     return url
 
@@ -32,7 +32,7 @@ def AskForURL(msg=""):
         root = Tk()
         root.withdraw()
         
-        label = "Please Enter a bse URL:"
+        label = "Please Enter a URL:"
         if msg != "":
             label = f"{msg}, {label}"
 
@@ -42,6 +42,6 @@ def AskForURL(msg=""):
         return url
     else:
         print(msg)
-        return input(f"Player Enter a base URL:")
+        return input(f"Player Enter a URL:")
 
 
