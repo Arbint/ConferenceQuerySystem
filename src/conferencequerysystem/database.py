@@ -292,15 +292,7 @@ class DataBase:
         df[self.attendedAllColumName] = (df[self.finishedColumnName] == len(BoothNames)).astype(int)
         return df
 
-
-    def SaveImageForUser(self, userInfos: list[str], boothName: str, image: Image):
-        savePath = self.unstructuredSaver.ComposeSavePathForUser(userInfos, boothName, "jpg")
-        saveBuff = BytesIO()        
-        image.convert("RGB").save(saveBuff, "JPEG",quality=90, optimize=True)
-        submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Photo, buffer = saveBuff.getvalue(), savePath = savePath)
-        self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))
-
-    def SaveVideoForUser(self, userInfos: list[str], boothName: str, videoBuffer, extention):
+    def SaveSubmissionForUser(self, userInfos: list[str], boothName: str, videoBuffer, extention):
         savePath = self.unstructuredSaver.ComposeSavePathForUser(userInfos, boothName, extention)
         submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Video, buffer = videoBuffer, savePath = savePath)
         self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))

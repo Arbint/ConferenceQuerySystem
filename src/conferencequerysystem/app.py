@@ -12,9 +12,8 @@ from conferencequerysystem.consts import (GetAdminAccessCode,
                                           ECompetitionSubmitType,
                                           GetCompetitionBoothInfo,
                                           GetSubmissionsForBooth,
-                                          GetVideoExtentions
+                                          GetAllowedExtensions
                                           )
-from PIL import Image
 
 class App:
     def __init__(self):
@@ -65,7 +64,7 @@ class App:
         if not self.CheckAndPromoteInvalidInfo(userInfos):
             self.DisplayUserInfo(userInfos)
             self.ShowUserSettings(userInfos, boothName)
-            self.ShowCompetitionStat(userInfos, boothName)
+            self.ShowCompetitionWidget(userInfos, boothName)
 
 
     def ShowUserSettings(self, userInfos, boothName):
@@ -79,47 +78,19 @@ class App:
             st.rerun()
 
 
-    def ShowCompetitionStat(self, userInfos, boothName):
+    def ShowCompetitionWidget(self, userInfos, boothName):
         competitionType = GetCompetitionType(boothName)
-        if competitionType != ECompetitionSubmitType.NoType:
-            competitionTypeName = competitionType.name
-            st.subheader(f"submit your interactive work & win a prize!")
-            st.text(f"how it works:")
-            st.text(f"1, finish your interactive work\n2, Take a {competitionTypeName}\n3, Click the Submit button")
-
-            photoKeyState = f"is_taking_photo_{boothName}"
-            if competitionType == ECompetitionSubmitType.Photo:
-                if st.button(f"Take Photo"):
-                    st.session_state[photoKeyState] = True
-
-                if st.session_state.get(photoKeyState, False):
-                    self.TakePhoto(userInfos, boothName)
-                
-            videoKeyState = f"is_taking_video_{boothName}"
-            if competitionType == ECompetitionSubmitType.Video:
-                if st.button(f"Upload Video"):
-                    st.session_state[videoKeyState] = True
-
-                if st.session_state.get(videoKeyState, False):
-                    self.TakeVideo(userInfos, boothName)
-
-
-    def TakeVideo(self, userInfos, boothName):
-        videoFile = st.file_uploader("Record/Upload a Video", type=GetVideoExtentions(), accept_multiple_files=False)
-        print(f"video is: {videoFile}")
-        if videoFile:
-            ext = Path(videoFile.name).suffix.lower() or ".mp4"
+        st.subheader(f"submit your interactive work & win a prize!")
+        st.text(f"how it works:")
+        st.text(f"1,Finish your interactive work")
+        st.text(f"2,User the widget below to upload")
+        st.text(f"\tIf failed:\n\tClick the Update Button\n\tRetry")
+        uploadedFile = st.file_uploader(f"Take/Upload a {competitionType.name}", type=GetAllowedExtensions(competitionType), accept_multiple_files=False)
+        if uploadedFile:
+            ext = Path(uploadedFile.name).suffix.lower()
             print("saving videos!")
-            self.dataBase.SaveVideoForUser(userInfos, boothName, videoFile.getvalue(), ext)
+            self.dataBase.SaveSubmissionForUser(userInfos, boothName, uploadedFile.getvalue(), ext)
 
-
-    def TakePhoto(self, userInfos, boothName):
-        key = f"camera_{boothName}_{"_".join(userInfos)}"
-        imageFileBuffer = st.camera_input("Take a picture", key=key)  
-        if(imageFileBuffer is not None):
-            image = Image.open(imageFileBuffer)
-            if image is not None and st.button("Submit"):
-                self.dataBase.SaveImageForUser(userInfos, boothName, image)
 
     def DisplayUserInfo(self, info):
         recordDf = self.dataBase.GetUserRecordAsDataFrame(info)
@@ -173,15 +144,18 @@ class App:
         if st.button(f"refresh {boothName.replace("_", " ")}"):
             st.rerun()
 
-        st_autorefresh(interval=self.submissionTabRefreshInterval, key=f"{boothName}AutoRefresh")
-
         files = GetSubmissionsForBooth(boothName)
+        fileType = GetCompetitionType(boothName)
         cols = st.columns(self.submissionDisplayColumnCount)
         for i, filePath in enumerate(files):
             with cols[i%self.submissionDisplayColumnCount]:
                 filePathStr = str(filePath)
                 captionName = self.dataBase.SubmissionFilePathToUserInfo(filePathStr)
-                st.image(filePathStr, caption=captionName, use_column_width=True)
+                if fileType == ECompetitionSubmitType.Photo:
+                    st.image(filePathStr, caption=captionName, use_column_width=True)
+                if fileType == ECompetitionSubmitType.Video:
+                    st.video(filePathStr, autoplay=True, loop=True)
+                    st.caption(captionName)
 
 
     def ShowMainAdminTab(self, tabName):

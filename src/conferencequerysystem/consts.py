@@ -54,7 +54,10 @@ def GetCSVOutputPath():
     return os.path.normpath(os.path.join(path, "data.csv"))
 
 def GetDataStorageRootDir():
-    return os.path.normpath(os.path.join(GetPrjDir(), "data"))
+    dataStorageRootDir = os.path.normpath(os.path.join(GetPrjDir(), "data"))
+    os.makedirs(dataStorageRootDir, exist_ok=True)
+
+    return dataStorageRootDir
 
 def GetDataBasePath():
     return os.path.normpath(os.path.join(GetDataStorageRootDir(), "data.db"))
@@ -92,13 +95,18 @@ def GetCompetitionBoothInfo():
 
 def GetSubmissionsForBooth(boothName: str):
     submissionDir = os.path.normpath(os.path.join(GetUnstructuredDataSaveDir(), boothName))
+    os.makedirs(submissionDir, exist_ok=True)
     submissionDir = Path(submissionDir)
     files = [f for f in submissionDir.iterdir() if f.is_file()]
 
     return files
 
-def GetVideoExtentions():
-    return ['mp4', "mov", 'webm', 'm4v']
+def GetAllowedExtensions(competitionType: ECompetitionSubmitType):
+    if competitionType == ECompetitionSubmitType.Video:
+        return ['mp4', "mov", 'webm', 'm4v']
+    
+    if competitionType == ECompetitionSubmitType.Photo:
+        return ['png', "jpg", "jpeg", "webp"]
 
 def GetAdminAccessCode():
     return "ANGD4444UPGRADEVICTORIA"
