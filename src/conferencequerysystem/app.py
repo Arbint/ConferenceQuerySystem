@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
+from pathlib import Path
 
 from conferencequerysystem.database import DataBase
 from conferencequerysystem.fetch import GetUsersWithAttendedCountHigherThan
@@ -10,8 +11,8 @@ from conferencequerysystem.consts import (GetAdminAccessCode,
                                           GetCompetitionType,
                                           ECompetitionSubmitType,
                                           GetCompetitionBoothInfo,
-                                          GetUnstructuredDataSaveDir,
-                                          GetSubmissionsForBooth
+                                          GetSubmissionsForBooth,
+                                          GetVideoExtentions
                                           )
 from PIL import Image
 
@@ -87,13 +88,29 @@ class App:
             st.text(f"1, finish your interactive work\n2, Take a {competitionTypeName}\n3, Click the Submit button")
 
             photoKeyState = f"is_taking_photo_{boothName}"
-
             if competitionType == ECompetitionSubmitType.Photo:
                 if st.button(f"Take Photo"):
                     st.session_state[photoKeyState] = True
 
                 if st.session_state.get(photoKeyState, False):
                     self.TakePhoto(userInfos, boothName)
+                
+            videoKeyState = f"is_taking_video_{boothName}"
+            if competitionType == ECompetitionSubmitType.Video:
+                if st.button(f"Upload Video"):
+                    st.session_state[videoKeyState] = True
+
+                if st.session_state.get(videoKeyState, False):
+                    self.TakeVideo(userInfos, boothName)
+
+
+    def TakeVideo(self, userInfos, boothName):
+        videoFile = st.file_uploader("Record/Upload a Video", type=GetVideoExtentions(), accept_multiple_files=False)
+        print(f"video is: {videoFile}")
+        if videoFile:
+            ext = Path(videoFile.name).suffix.lower() or ".mp4"
+            print("saving videos!")
+            self.dataBase.SaveVideoForUser(userInfos, boothName, videoFile.getvalue(), ext)
 
 
     def TakePhoto(self, userInfos, boothName):
@@ -103,10 +120,6 @@ class App:
             image = Image.open(imageFileBuffer)
             if image is not None and st.button("Submit"):
                 self.dataBase.SaveImageForUser(userInfos, boothName, image)
-
-
-    def TakeVideo(self, userInfos, boothName):
-        print(f"taking video for: {userInfos}, at booth {boothName}")
 
     def DisplayUserInfo(self, info):
         recordDf = self.dataBase.GetUserRecordAsDataFrame(info)

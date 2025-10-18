@@ -38,13 +38,17 @@ class UnstructuredDataSaveUtility:
 
         return saveDir
 
-    def SaveImage(self, savePath):
-        print(f"saving path is: {savePath}")
-
     def SaveSubmission(self, fileSubmission: FileSubmission):
         tmp_path = fileSubmission.savePath + ".part"
         with open(tmp_path, "wb") as f:
             f.write(fileSubmission.buffer)
+
+            # f.flush() push the data in the file out of the executable's memory, so it should just live in the os's memory
+            # f.fileno() returns the file number of the file, a unique id(or called descriptor) that is used in the underlying operating system to locate the file
+            # os.sfync(fileId) means write the file data from memory to disk right now, this ensures it is saved even the program crashes
+            # so f.flush() make sure that the memory is now in the hand of the os, and os.fsync(f.fileno()) ensures the file is on disk.
+            f.flush()
+            os.fsync(f.fileno())
 
         os.replace(tmp_path, fileSubmission.savePath)
 
@@ -296,5 +300,9 @@ class DataBase:
         submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Photo, buffer = saveBuff.getvalue(), savePath = savePath)
         self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))
 
+    def SaveVideoForUser(self, userInfos: list[str], boothName: str, videoBuffer, extention):
+        savePath = self.unstructuredSaver.ComposeSavePathForUser(userInfos, boothName, extention)
+        submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Video, buffer = videoBuffer, savePath = savePath)
+        self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))
 
 

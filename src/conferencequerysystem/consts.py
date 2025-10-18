@@ -87,7 +87,7 @@ def GetCompetitionType(boothName):
 def GetCompetitionBoothInfo():
     return {
                 "Modeling_Interactive": ECompetitionSubmitType.Photo,
-                "Animation_Interactive": ECompetitionSubmitType.Photo
+                "Animation_Interactive": ECompetitionSubmitType.Video
            }
 
 def GetSubmissionsForBooth(boothName: str):
@@ -96,6 +96,9 @@ def GetSubmissionsForBooth(boothName: str):
     files = [f for f in submissionDir.iterdir() if f.is_file()]
 
     return files
+
+def GetVideoExtentions():
+    return ['mp4', "mov", 'webm', 'm4v']
 
 def GetAdminAccessCode():
     return "ANGD4444UPGRADEVICTORIA"
