@@ -1,6 +1,10 @@
 # Conference Query System
 
-<img src="documentation/documentationAssets/frontend.png" width = 400> <img src="documentation/documentationAssets/admin.png" width = 400>
+<img src="documentation/documentationAssets/frontEndWithSubmission.png" width = 400> 
+
+<img src="documentation/documentationAssets/admin.png" width = 400>
+
+
 
 ## Features
 
