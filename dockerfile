@@ -27,6 +27,8 @@ RUN poetry install
 
 # Expose the default streamlit port
 EXPOSE 8501
+EXPOSE 8502
+EXPOSE 8503
 
 #Command to launch the server
 ENTRYPOINT ["poetry", "run", "launchserver"]

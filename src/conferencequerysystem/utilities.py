@@ -1,4 +1,3 @@
-from tkinter import simpledialog, Tk
 import os
 import sys
 from urllib.parse import urlparse
@@ -29,6 +28,7 @@ def GetURLFromUser(msg: str):
 
 def AskForURL(msg=""):
     if SupprtGUI():
+        from tkinter import simpledialog, Tk
         root = Tk()
         root.withdraw()
         

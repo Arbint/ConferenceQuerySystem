@@ -9,5 +9,9 @@ services:
     ports:
       - '8501:8501/udp'
       - '8501:8501/tcp'
+      - '8502:8502/udp'
+      - '8502:8502/tcp'
+      - '8503:8503/udp'
+      - '8503:8503/tcp'
     command: ["poetry", "run", "launchserver"]
 
