@@ -160,6 +160,11 @@ def main():
     # http://192.168.1.91:8501
     # if the port is intergrated with the url like the ones you would get from cloudflared tunneling,then only the tunneled url is requred.
 
+    # The current port preference is:
+    # the user clients uses 8501
+    # the admin clients uses 8502
+    # the submission clients uses 8503
+
     clientURL = GetURLFromUser("Client Server URL")
     adminURL = GetURLFromUser("admin Server URL")
     submissionURL = GetURLFromUser("submission Server URL")
