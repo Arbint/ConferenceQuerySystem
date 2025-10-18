@@ -72,7 +72,7 @@ class App:
                 if fileType == ECompetitionSubmitType.Photo:
                     st.image(filePathStr, caption=captionName, use_column_width=True)
                 if fileType == ECompetitionSubmitType.Video:
-                    st.video(filePathStr, autoplay=True, loop=True)
+                    st.video(filePathStr, autoplay=True, muted=True, loop=True)
                     st.caption(captionName)
 
 app = App()

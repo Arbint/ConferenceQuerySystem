@@ -77,8 +77,11 @@ class App:
         uploadedFile = st.file_uploader(f"Take/Upload a {competitionType.name}", type=GetAllowedExtensions(competitionType), accept_multiple_files=False)
         if uploadedFile:
             ext = Path(uploadedFile.name).suffix.lower()
-            print("saving videos!")
-            self.dataBase.SaveSubmissionForUser(userInfos, boothName, uploadedFile.getvalue(), ext)
+            success, msg = self.dataBase.SaveSubmissionForUser(userInfos, boothName, uploadedFile.getvalue(), ext)
+            if success:
+                st.success("Upload Successful!")
+            else:
+                st.error(f"failed to upload: {msg}")
 
 
     def DisplayUserInfo(self, info):

@@ -3,7 +3,11 @@ import json
 import pandas as pd
 import threading
 import queue
-from conferencequerysystem.consts import GetBoothNameTable, GetDataBasePath, GetUsrIdentiryColumnNames, GetUnstructuredDataSaveDir
+from conferencequerysystem.consts import (GetBoothNameTable,
+                                          GetDataBasePath,
+                                          GetUsrIdentiryColumnNames,
+                                          GetUnstructuredDataSaveDir
+                                          )
 from PIL import Image
 import os
 from enum import Enum
@@ -295,9 +299,9 @@ class DataBase:
         df[self.attendedAllColumName] = (df[self.finishedColumnName] == len(BoothNames)).astype(int)
         return df
 
-    def SaveSubmissionForUser(self, userInfos: list[str], boothName: str, videoBuffer, extention):
+    def SaveSubmissionForUser(self, userInfos: list[str], boothName: str, fileBuffer, extention):
         savePath = self.unstructuredSaver.ComposeSavePathForUser(userInfos, boothName, extention)
-        submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Video, buffer = videoBuffer, savePath = savePath)
+        submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Video, buffer = fileBuffer, savePath = savePath)
         self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))
 
-
+        return True, ""
