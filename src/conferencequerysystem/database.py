@@ -1,9 +1,75 @@
 import sqlite3
-import os
+import json
 import pandas as pd
 import threading
 import queue
-from conferencequerysystem.consts import GetBoothNameTable, GetDataBasePath, GetUsrDataCollectEntires
+from conferencequerysystem.consts import GetBoothNameTable, GetDataBasePath, GetUsrIdentiryColumnNames, GetUnstructuredDataSaveDir
+from PIL import Image
+import os
+from enum import Enum
+from io import BytesIO
+from pathlib import Path
+
+class EFileSubmissionSaveType(Enum):
+    NoType = 1
+    Photo = 2
+    Video = 3
+
+class FileSubmission:
+    def __init__(self, fileSaveType=EFileSubmissionSaveType.NoType, buffer=None, savePath=None):
+        self.fileType = fileSaveType
+        self.buffer = buffer
+        self.savePath = savePath
+
+
+class UnstructuredDataSaveUtility:
+    def __init__(self, saveRootDir = GetUnstructuredDataSaveDir()):
+        self.saveRootDir = saveRootDir
+        self.fileNameUserInfoJoinCharacter = "_"
+
+    def ComposeSavePathForUser(self, userInfos, boothName, ext):
+        fileName = f"{self.fileNameUserInfoJoinCharacter.join(userInfos)}.{ext}"
+        return os.path.normpath(os.path.join(self.GetSaveDirForCategory(boothName), fileName))
+
+    def GetSaveDirForCategory(self, category):
+        saveDir = os.path.normpath(os.path.join(self.saveRootDir, category))
+        if not os.path.exists(saveDir):
+            os.makedirs(saveDir, exist_ok=True)
+
+        return saveDir
+
+    def SaveImage(self, savePath):
+        print(f"saving path is: {savePath}")
+
+    def SaveSubmission(self, fileSubmission: FileSubmission):
+        tmp_path = fileSubmission.savePath + ".part"
+        with open(tmp_path, "wb") as f:
+            f.write(fileSubmission.buffer)
+
+        os.replace(tmp_path, fileSubmission.savePath)
+
+    def SubmissionFilePathToUserInfo(self, filePath):
+        stem = Path(filePath).stem
+        userInfos = stem.split(self.fileNameUserInfoJoinCharacter)
+        return f"{userInfos[2]} {userInfos[0]} from {userInfos[1]}"
+
+
+class UserUpdateInfo:
+    """
+    ***arguments:*** 
+    * info(list(str)): user name, and all other infomations like (school, occupation, from, etc), used to find a user or add a user
+    * boothName(str): the booth the user has visited
+    * fileSubmission(FileSubmission): the file the user has uploaded, currently supports image only.
+    """
+    def __init__(self, userInfos, boothName, fileSubmission:FileSubmission):
+        self.userInfos = userInfos
+        self.boothName = boothName
+        self.fileSubmission: FileSubmission = fileSubmission
+
+    def __str__(self):
+        basicInfo = " ".join(self.userInfos)
+        return f"{basicInfo}\nBooth: {self.boothName}\nFile:{self.fileSubmission.fileType.name} at {self.fileSubmission.savePath}"
+
 
 class DataBase:
     def __init__(self):
@@ -21,19 +87,26 @@ class DataBase:
 
         self.CreateDataTable()
 
-    def EnqueUserUpdate(self, info, visitedBooth):
+        self.unstructuredSaver = UnstructuredDataSaveUtility()
+
+    def SubmissionFilePathToUserInfo(self, filePath):
+        return self.unstructuredSaver.SubmissionFilePathToUserInfo(filePath)
+
+    def EnqueUserUpdateBoothOnly(self, userInfos, boothName):
+        self.EnqueUserUpdate(UserUpdateInfo(userInfos=userInfos, boothName=boothName, fileSubmission=FileSubmission()))
+
+    def EnqueUserUpdate(self, userUpdateInfo: UserUpdateInfo):
         """
         ## Called by front end to update or add a user
-        ***arguments:*** 
-        * info(list(str)): user name, and all other infomations like (school, occupation, from, etc), used to find a user or add a user
-        * visitedBooth(str): the booth the user has visited
-
+        
+        ***arguments:***
+        - ***userUpdateInfo***(UserUpdateInfo): the user update info that contains user name and others, the booth name, and file submissions if any are present
         ***return:***
 
         None
         """
 
-        self.writeQueue.put([info, visitedBooth])
+        self.writeQueue.put(userUpdateInfo)
         self.StartWriteThread()
 
     def StartWriteThread(self):
@@ -51,10 +124,11 @@ class DataBase:
         
     def ProcessQueue(self):
         while not self.writeQueue.empty():
-            data = self.writeQueue.get()
-            print(f"process queued data: {data}")
+            userUpdateInfo: UserUpdateInfo = self.writeQueue.get()
+            print(f"process queued data:\n{userUpdateInfo}")
             try:
-                self.AddOrUpdateUser(data[0], data[1])
+                self.AddOrUpdateUser(userUpdateInfo)
+                self.unstructuredSaver.SaveSubmission(userUpdateInfo.fileSubmission)
             except sqlite3.OperationalError as e:
                 print("=======================EORROR========================")
                 print(f"error during write operation: {e}")
@@ -65,13 +139,18 @@ class DataBase:
     def CreateDataTable(self):
         columnDefination = f'''id INTEGER PRIMARY KEY AUTOINCREMENT'''
 
-        for col in GetUsrDataCollectEntires():
+        for col in GetUsrIdentiryColumnNames():
             columnDefination += f",\n{col} TEXT"
 
         for boothName in self.GetBoothNames():
             columnDefination += f",\n{boothName} INTEGER"
 
+        columnDefination += f", \n{self.GetCompetitionColumnName()} TEXT"
+
         self.cursor.execute(f'CREATE TABLE IF NOT EXISTS {self.dtName} ({columnDefination})')
+
+    def GetCompetitionColumnName(self):
+        return "competitions"
 
     def GetInvalidInfos(self, info):
         InvalidInfo = []
@@ -81,20 +160,15 @@ class DataBase:
 
         return InvalidInfo
 
-    def GetRecord(self, info):
-        query = self.BuildUserQuery()
-        self.cursor.execute(query, tuple(info))
+    def GetRecord(self, userInfos, recordColumNames="*"):
+        query = self.BuildUserQuery(recordColumNames)
+        self.cursor.execute(query, tuple(userInfos))
         user = self.cursor.fetchone()
         return user
 
-    def BuildUserQuery(self):
-        queryFilterList = []
-        for col in GetUsrDataCollectEntires():
-            queryFilterList.append(f"{col}=?")
-
-        queryFilters = ' AND '.join(queryFilterList)
-        query = f'SELECT * FROM {self.dtName} WHERE {queryFilters}'
-        print(f"query is: {query}")
+    def BuildUserQuery(self, querycolumnName = "*"):
+        queryFilters = self.ComposeUserQueryFilters()
+        query = f'SELECT {querycolumnName} FROM {self.dtName} WHERE {queryFilters}'
         return query
 
     def GetUserRecordAsDataFrame(self, info):
@@ -121,50 +195,84 @@ class DataBase:
         return False
 
 
-    def AddOrUpdateUser(self, info, visitedBooth):
-        record = self.GetRecord(info)
+    def AddOrUpdateUser(self, userUpdateInfo: UserUpdateInfo):
+        record = self.GetRecord(userUpdateInfo.userInfos)
         if record:
-            self.UpdateUser(info, visitedBooth)
+            self.UpdateUser(userUpdateInfo)
         else:
-            self.AddUser(info, visitedBooth)
+            self.AddUser(userUpdateInfo)
 
-    def AddUser(self, info, visitedBooth):
-        if self.GetRecord(info):
+    def AddUser(self, userUpdateInfo: UserUpdateInfo):
+        if self.GetRecord(userUpdateInfo.userInfos):
             return
 
-        colNames = GetUsrDataCollectEntires() 
+        identityColNames = GetUsrIdentiryColumnNames() 
         boothVisitedRecord = []
 
         boothNames = list(self.boothNameTable.values())
         for boothName in boothNames: 
-            colNames.append(boothName)
-            if boothName == visitedBooth:
+            identityColNames.append(boothName)
+            if boothName == userUpdateInfo.boothName:
                 boothVisitedRecord.append('1')
             else:
                 boothVisitedRecord.append('0')
 
         infoColValuesPlaceHolders = ""
-        for i in range(len(GetUsrDataCollectEntires())):
+        for i in range(len(GetUsrIdentiryColumnNames())):
             infoColValuesPlaceHolders += "?,"
 
-        query = f'INSERT INTO {self.dtName} ({",".join(colNames)}) VALUES ({infoColValuesPlaceHolders} {",".join(boothVisitedRecord)})'
-        self.cursor.execute(query,tuple(info))
+        query = f'INSERT INTO {self.dtName} ({",".join(identityColNames)}) VALUES ({infoColValuesPlaceHolders} {",".join(boothVisitedRecord)})'
+        self.cursor.execute(query,tuple(userUpdateInfo.userInfos))
         self.connection.commit()
+
+        self.UpdateUserCompetitionEntry(userUpdateInfo)
 
     def GetBoothNames(self):
         return list(self.boothNameTable.values())
 
-    def UpdateUser(self, info, newVisitedBooth):
+    def ComposeUserQueryFilters(self):
         queryFilterList = []
-        for col in GetUsrDataCollectEntires():
-            queryFilterList.append(f" {col}=?")
+        for col in GetUsrIdentiryColumnNames():
+            queryFilterList.append(f"{col}=?")
 
-        queryFilters = ' AND '.join(queryFilterList)
-        query = f'UPDATE {self.dtName} Set {newVisitedBooth} = 1 WHERE {queryFilters}'
-        print(f"query is: {query}")
+        return ' AND '.join(queryFilterList)
 
-        print(query)
-        self.cursor.execute(query, tuple(info))
+
+    def UpdateUser(self, userUpdateInfo: UserUpdateInfo):
+        queryFilters = self.ComposeUserQueryFilters()
+        boothUpdateQuery = f'UPDATE {self.dtName} Set {userUpdateInfo.boothName} = 1 WHERE {queryFilters}'
+        self.cursor.execute(boothUpdateQuery, tuple(userUpdateInfo.userInfos))
+        self.connection.commit()
+
+        self.UpdateUserCompetitionEntry(userUpdateInfo)
+
+    def UpdateUserCompetitionEntry(self, userUpdateInfo: UserUpdateInfo):
+        """
+        competition entires are stored as strings with each entry seperated by a comma:
+        "entryOne,entryTwo"
+        """
+
+        if userUpdateInfo.fileSubmission.fileType == EFileSubmissionSaveType.NoType:
+            return
+
+        currentCompetitionEntriesStr = self.GetRecord(userUpdateInfo.userInfos, self.GetCompetitionColumnName())[0]
+        print(f"{userUpdateInfo.userInfos[0]} currently has: {currentCompetitionEntriesStr} competition entires")
+    
+        newCompetitionEntry = userUpdateInfo.fileSubmission.savePath
+        if currentCompetitionEntriesStr is not None and newCompetitionEntry in currentCompetitionEntriesStr:
+            print(f"{newCompetitionEntry} is already in existing entiries: {currentCompetitionEntriesStr}")
+            return
+
+        #compose new competition entries as a str
+        newCompetitionEntriesStr = newCompetitionEntry
+        if currentCompetitionEntriesStr is not None:
+            newCompetitionEntriesStr = f"{newCompetitionEntriesStr},{currentCompetitionEntriesStr}"
+
+        # apply the change to the data base
+        queryFilters = self.ComposeUserQueryFilters()
+        competitionEntiresUpdateQuery = f'UPDATE {self.dtName} Set {self.GetCompetitionColumnName()} = ? WHERE {queryFilters}'
+        competitionEntiresQueryParms = [newCompetitionEntriesStr] + userUpdateInfo.userInfos
+        self.cursor.execute(competitionEntiresUpdateQuery, tuple(competitionEntiresQueryParms))
         self.connection.commit()
 
     def GetDataAsDataFrame(self):
@@ -179,3 +287,14 @@ class DataBase:
 
         df[self.attendedAllColumName] = (df[self.finishedColumnName] == len(BoothNames)).astype(int)
         return df
+
+
+    def SaveImageForUser(self, userInfos: list[str], boothName: str, image: Image):
+        savePath = self.unstructuredSaver.ComposeSavePathForUser(userInfos, boothName, "jpg")
+        saveBuff = BytesIO()        
+        image.convert("RGB").save(saveBuff, "JPEG",quality=90, optimize=True)
+        submissionInfo = FileSubmission(fileSaveType = EFileSubmissionSaveType.Photo, buffer = saveBuff.getvalue(), savePath = savePath)
+        self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))
+
+
+

@@ -62,7 +62,7 @@ def GetDataBasePath():
 def GetUnstructuredDataSaveDir():
     return os.path.normpath(os.path.join(GetDataStorageRootDir(), "unstructured"))
 
-def GetUsrDataCollectEntires():
+def GetUsrIdentiryColumnNames():
     return ["name", "school", "occupation"]
 
 def GetBoothNameTable():
@@ -87,8 +87,15 @@ def GetCompetitionType(boothName):
 def GetCompetitionBoothInfo():
     return {
                 "Modeling_Interactive": ECompetitionSubmitType.Photo,
-                "Animation_Interactive": ECompetitionSubmitType.Video
+                "Animation_Interactive": ECompetitionSubmitType.Photo
            }
+
+def GetSubmissionsForBooth(boothName: str):
+    submissionDir = os.path.normpath(os.path.join(GetUnstructuredDataSaveDir(), boothName))
+    submissionDir = Path(submissionDir)
+    files = [f for f in submissionDir.iterdir() if f.is_file()]
+
+    return files
 
 def GetAdminAccessCode():
     return "ANGD4444UPGRADEVICTORIA"
