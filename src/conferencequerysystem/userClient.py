@@ -73,6 +73,7 @@ class App:
         st.text(f"how it works:")
         st.text(f"1,Finish your interactive work")
         st.text(f"2,User the widget below to upload")
+        st.text(f"3,Your submission should appear")
         st.text(f"\tIf failed, refresh & retry")
         uploadedFile = st.file_uploader(f"Take/Upload a {competitionType.name}", type=GetAllowedExtensions(competitionType), accept_multiple_files=False)
         if uploadedFile:
@@ -80,8 +81,27 @@ class App:
             success, msg = self.dataBase.SaveSubmissionForUser(userInfos, boothName, uploadedFile.getvalue(), ext)
             if success:
                 st.success("Upload Successful!")
+                self.ShowCurrentSubmission(uploadedFile, competitionType)
             else:
                 st.error(f"failed to upload: {msg}")
+        else:
+            self.ShowPrevSubmission(userInfos, boothName, competitionType)
+
+    def ShowCurrentSubmission(self, uploadedFile, competitionType):
+        self.ShowSubmission(uploadedFile, competitionType)
+
+    def ShowPrevSubmission(self, userInfos, boothName, competitionType):
+        prevSubmission = self.dataBase.GetUserPrevSubmission(userInfos, boothName)
+        if prevSubmission:
+            st.text("Your submission:")
+            filePathStr = str(prevSubmission)
+            self.ShowSubmission(filePathStr, competitionType)
+
+    def ShowSubmission(self, file, competitionType):
+        if competitionType == ECompetitionSubmitType.Photo:
+            st.image(file, use_column_width=True)
+        if competitionType == ECompetitionSubmitType.Video:
+            st.video(file, autoplay=True, muted=True, loop=True)
 
 
     def DisplayUserInfo(self, info):

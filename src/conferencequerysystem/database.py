@@ -32,7 +32,7 @@ class UnstructuredDataSaveUtility:
         self.fileNameUserInfoJoinCharacter = "_"
 
     def ComposeSavePathForUser(self, userInfos, boothName, ext):
-        fileName = f"{self.fileNameUserInfoJoinCharacter.join(userInfos)}.{ext}"
+        fileName = f"{self.ComposeSaveFileNameForUser(userInfos)}{ext}"
         return os.path.normpath(os.path.join(self.GetSaveDirForCategory(boothName), fileName))
 
     def GetSaveDirForCategory(self, category):
@@ -41,6 +41,9 @@ class UnstructuredDataSaveUtility:
             os.makedirs(saveDir, exist_ok=True)
 
         return saveDir
+
+    def ComposeSaveFileNameForUser(self, userInfos):
+         return f"{self.fileNameUserInfoJoinCharacter.join(userInfos)}"
 
     def SaveSubmission(self, fileSubmission: FileSubmission):
         if fileSubmission.fileType == EFileSubmissionSaveType.NoType:
@@ -305,3 +308,14 @@ class DataBase:
         self.EnqueUserUpdate(UserUpdateInfo(userInfos, boothName, submissionInfo))
 
         return True, ""
+
+    def GetUserPrevSubmission(self, userInfos, boothName: str):
+        saveDir = self.unstructuredSaver.GetSaveDirForCategory(boothName)
+        fileName = self.unstructuredSaver.ComposeSaveFileNameForUser(userInfos)
+        for file in os.listdir(saveDir):
+            if fileName in file:
+                return os.path.normpath(os.path.join(saveDir, file))
+
+        return None
+            
+
