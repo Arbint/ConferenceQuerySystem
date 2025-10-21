@@ -28,20 +28,27 @@ def GetURLFromUser(msg: str):
 
 def AskForURL(msg=""):
     if SupprtGUI():
-        from tkinter import simpledialog, Tk
-        root = Tk()
-        root.withdraw()
-        
-        label = "Please Enter a URL:"
-        if msg != "":
-            label = f"{msg}, {label}"
+        try:
+            from tkinter import simpledialog, Tk
+            root = Tk()
+            root.withdraw()
+            
+            label = "Please Enter a URL:"
+            if msg != "":
+                label = f"{msg}, {label}"
 
-        url = simpledialog.askstring(msg, label)
+            url = simpledialog.askstring(msg, label)
 
-        root.destroy()
-        return url
+            root.destroy()
+            return url
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return AskForURLFromConsole(msg)
     else:
-        print(msg)
-        return input(f"Player Enter a URL:")
+        return AskForURLFromConsole(msg)
+
+def AskForURLFromConsole(msg=""):
+    print(msg)
+    return input(f"Please Enter a URL:")
 
 
