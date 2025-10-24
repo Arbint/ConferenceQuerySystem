@@ -231,6 +231,12 @@ A [urls.txt](./output/qrcodes/urls.txt) should also be generated in ```output/qr
 * Ports:
   Open UDP and TCP port 8501, 8502, 8503, you can define it with the sercuriy rules of the EC2.
 
+* You may want to set up password for the user so you can use sudo commands:
+
+```sh
+sudo passwd $(whoami)
+```
+
 * To install docker on AWS-Linux
 
     ```sh
