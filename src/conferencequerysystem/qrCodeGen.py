@@ -5,7 +5,6 @@ from conferencequerysystem.utilities import GetURLFromUser
 from PIL import Image, ImageOps
 import math
 from pathlib import Path
-from pyzbar.pyzbar import decode
 
 
 class QRCodeGen:
@@ -161,23 +160,28 @@ class QRCodeGen:
         return ouputFilePath
 
     def WriteURLsToFile(self):
-        with open(self.GetOutputURLsTextFilePath(), "wt") as f:
-            qrCodePaths = self.GetExistingQrCodes()
-            for qrCodePath in qrCodePaths:
-                ext = Path(qrCodePath).suffix
-                if "png" not in ext:
-                    continue
+        try:
+            from pyzbar.pyzbar import decode
+            with open(self.GetOutputURLsTextFilePath(), "wt") as f:
+                qrCodePaths = self.GetExistingQrCodes()
+                for qrCodePath in qrCodePaths:
+                    ext = Path(qrCodePath).suffix
+                    if "png" not in ext:
+                        continue
 
-                urlName = Path(qrCodePath).stem
-                f.writelines(f"{urlName}:\n")
-                qrCodeImage = Image.open(qrCodePath)
-                decodeResults = decode(qrCodeImage)
-                for decodedQrCode in decodeResults:
-                    url = decodedQrCode.data.decode("utf-8")
-                    print(f"found url: {url} for {urlName}")
-                    f.writelines(f"{url}\n")
+                    urlName = Path(qrCodePath).stem
+                    f.writelines(f"{urlName}:\n")
+                    qrCodeImage = Image.open(qrCodePath)
+                    decodeResults = decode(qrCodeImage)
+                    for decodedQrCode in decodeResults:
+                        url = decodedQrCode.data.decode("utf-8")
+                        print(f"found url: {url} for {urlName}")
+                        f.writelines(f"{url}\n")
 
-                f.writelines("\n")
+                    f.writelines("\n")
+        except:
+            print(f"the pyzbar is not imported properly, please add system support for zbar")
+
 
 
 

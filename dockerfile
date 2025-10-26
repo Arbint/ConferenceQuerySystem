@@ -20,6 +20,7 @@ COPY pyproject.toml poetry.lock ./
 
 COPY assets ./assets
 COPY src ./src
+COPY .streamlit ./.streamlit
 COPY README.md ./README.md
 
 RUN poetry lock
