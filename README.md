@@ -353,9 +353,8 @@ tunnel: f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx
 credentials-file: /etc/cloudflared/f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json
 
 ingress:
-    # this one seems to not work, but angdevents.com without www works...
     - hostname: www.angdevents.com
-      service: http://127.0.0.1:8051
+      service: http://127.0.0.1:8501
 
     - hostname: angdevents.com
       service: http://127.0.0.1:8501
@@ -385,15 +384,15 @@ The 2 files under ~/.cloudflared/
 f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json
 config.yml
 ```
-needs to be moved to /etc/.cloudflared/, the reason is if we are going to run a system level cloudflared service, then it will look for the configuration files in /etc/.cloudflared
+needs to be moved to /etc/cloudflared/, the reason is if we are going to run a system level cloudflared service, then it will look for the configuration files in /etc/cloudflared
 
 ```sh
-sudo mkdir -p /etc/.cloudflared
+sudo mkdir -p /etc/cloudflared
 ```
 
 ```sh
-sudo mv f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json /etc/.cloudflared/
-sudo mv config.yml /etc/.cloudflared/
+sudo mv f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json /etc/cloudflared/
+sudo mv config.yml /etc/cloudflared/
 ```
 
 * Install and start the cloud flared service
