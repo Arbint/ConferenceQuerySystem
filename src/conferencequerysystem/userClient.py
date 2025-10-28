@@ -51,7 +51,8 @@ class App:
 
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
-        st.title(f"Welcome to {GetConferenceName()}!")
+        st.image(self.GetConferenceLogoPath())
+        st.title(f"Welcome!")
         boothDisplayName = self.ConvertyBoothNameToDisplayName(boothName)
         st.subheader(f"You are at the {boothDisplayName} booth")
         userInfos = []
