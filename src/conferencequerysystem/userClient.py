@@ -36,7 +36,7 @@ class App:
         # st.title("UPGRADE CONFERENCE")
         st.image(self.GetConferenceLogoPath())
         st.write("Tnank you for joining UPGRADE Conference 2025!")
-        st.write("Please access the booths by scanning the QR codes provided at each booth.")
+        st.write("Join the scanvenger hunt by visiting the booths and scanning the QR codes provided at each booth.")
 
         st.subheader("Conference Map")
         st.image(self.GetConferenceMapPath())
