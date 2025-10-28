@@ -1,5 +1,6 @@
 import streamlit as st
 from pathlib import Path
+import os
 
 from conferencequerysystem.database import DataBase
 from conferencequerysystem.consts import (
@@ -8,7 +9,8 @@ from conferencequerysystem.consts import (
                                           GetUsrIdentiryColumnNames,
                                           GetCompetitionType,
                                           ECompetitionSubmitType,
-                                          GetAllowedExtensions
+                                          GetAllowedExtensions,
+                                          GetAssetDir,
                                           )
 
 class App:
@@ -28,9 +30,24 @@ class App:
         if code:
             self.ShowBoothGreeting(code)
         else:
-            st.title("UPGRADE CONFERENCE")
-            st.text("Tnank you for joining UPGRADE Conference 2025!")
-            st.text("Please access the booths by scanning the QR codes provided at each booth.")
+            self.ShowMainGreeting()
+
+    def ShowMainGreeting(self):
+        # st.title("UPGRADE CONFERENCE")
+        st.image(self.GetConferenceLogoPath())
+        st.text("Tnank you for joining UPGRADE Conference 2025!")
+        st.text("Please access the booths by scanning the QR codes provided at each booth.")
+
+        st.subheader("Conference Map")
+        st.image(self.GetConferenceMapPath())
+
+    def GetConferenceMapPath(self):
+        mapPath = os.path.join(GetAssetDir(), "siteContent", "SEC-MAP-scaled.jpg")
+        return str(os.path.normpath(mapPath))
+
+    def GetConferenceLogoPath(self):
+        logoPath = os.path.join(GetAssetDir(), "siteContent", "upgrade_logo.png")
+        return str(os.path.normpath(logoPath))
 
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
