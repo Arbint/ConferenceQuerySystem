@@ -296,3 +296,123 @@ these 2 can be achieved by navigating to the scripts directory.and run:
 ```sh
 ./copyDataToLocal.sh
 ```
+
+## Cloud Flare Tunneling
+
+We can use cloud flare tunneling with a purchased domian to enable https.
+
+* Buy a domain through [cloudflared registrar](https://dash.cloudflare.com/6602a7e9d9d6841eaa3faa9acbb0b2c5/registrar/register)
+
+let's say your bought a domain called ```angdevents.com```
+
+* Install cloudflared:
+we will need to add cloudflared to the yum package registry
+```sh
+curl -L --output cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-x86_64.rpm
+```
+
+Then we can install
+```sh
+sudo yum localinstall cloudflared.rpm
+```
+
+* Login Cloud Flared
+
+```sh
+cloudflared tunnel login
+```
+This will give you a long URL. Copy that URL.
+
+Paste the URL into your local computer's browser.
+
+Log in to Cloudflare, and you'll be asked to pik a domain. Select your new domain to authorize this tunnel.
+
+* Create the tunnel
+
+```sh
+cloudflared tunnel create conference-tunnel
+```
+
+This will output two important pieces of information. Copy them into a temporary text file, as you'll need them in the next step:
+
+1, A Tunnel ID (a long string of letters and numbers, like f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx).
+
+2, A credentials file path (e.g., /home/ec2-user/.cloudflared/f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json).
+
+* Create a Configuration File
+
+```sh
+sudo vi ~/.cloudflared/config.yml
+```
+
+configure it as:
+```yml
+# this should be your Tunnel ID generated in the previous step
+tunnel: f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx
+# this should be the same name as the tunnel id with a .json extension
+credentials-file: /etc/cloudflared/f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json
+
+ingress:
+    # this one seems to not work, but angdevents.com without www works...
+    - hostname: www.angdevents.com
+      service: http://127.0.0.1:8051
+
+    - hostname: angdevents.com
+      service: http://127.0.0.1:8501
+
+    - hostname: admin.angdevents.com
+      service: http://127.0.0.1:8502
+
+    - hostname: submissions.angdevents.com
+      service: http://127.0.0.1:8503
+
+    # This last rule is a required catch-all to block any other requests
+    - service: http_status:404
+```
+
+* Establish the tunneling:
+```sh
+cloudflared tunnel route dns conference-tunnel www.angdevents.com
+cloudflared tunnel route dns conference-tunnel angdevents.com
+cloudflared tunnel route dns conference-tunnel admin.angdevents.com
+cloudflared tunnel route dns conference-tunnel submissions.angdevents.com
+```
+
+* Move the config files to /etc/.cloudflared/
+
+The 2 files under ~/.cloudflared/
+```yml
+f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json
+config.yml
+```
+needs to be moved to /etc/.cloudflared/, the reason is if we are going to run a system level cloudflared service, then it will look for the configuration files in /etc/.cloudflared
+
+```sh
+sudo mkdir -p /etc/.cloudflared
+```
+
+```sh
+sudo mv f7s8-c4e8-4v9v-b9f3-c54c3b58xxxx.json /etc/.cloudflared/
+sudo mv config.yml /etc/.cloudflared/
+```
+
+* Install and start the cloud flared service
+
+```NOTE``` this won't work without the previous step
+```sh
+sudo cloudflared service install
+```
+
+start the service:
+```sh
+sudo systemctl start cloudflared
+```
+
+check if the service runs ok:
+```sh
+sudo systemctl status cloudflared
+```
+
+be sure the logs has no err.
+
+Then you should be able to access it through https://angdevents.com
