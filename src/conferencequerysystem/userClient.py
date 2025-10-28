@@ -17,11 +17,20 @@ class App:
 
     def GetCode(self): 
         context=st.query_params
-        return context.get("c", "")
+        try:
+            return context.get("c", "")
+        except:
+            return None
+
 
     def Start(self):
         code = self.GetCode()
-        self.ShowBoothGreeting(code)
+        if code:
+            self.ShowBoothGreeting(code)
+        else:
+            st.title("UPGRADE CONFERENCE")
+            st.text("Tnank you for joining UPGRADE Conference 2025!")
+            st.text("Please access the booths by scanning the QR codes provided at each booth.")
 
     def ShowBoothGreeting(self, boothCode):
         boothName = GetBoothNameTable()[boothCode] 
