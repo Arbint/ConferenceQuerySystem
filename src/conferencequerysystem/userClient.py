@@ -35,8 +35,8 @@ class App:
     def ShowMainGreeting(self):
         # st.title("UPGRADE CONFERENCE")
         st.image(self.GetConferenceLogoPath())
-        st.text("Tnank you for joining UPGRADE Conference 2025!")
-        st.text("Please access the booths by scanning the QR codes provided at each booth.")
+        st.write("Tnank you for joining UPGRADE Conference 2025!")
+        st.write("Please access the booths by scanning the QR codes provided at each booth.")
 
         st.subheader("Conference Map")
         st.image(self.GetConferenceMapPath())
