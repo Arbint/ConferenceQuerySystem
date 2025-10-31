@@ -88,7 +88,7 @@ class App:
 
         if st.button(buttonLabel):
             st.text(f"Thank you for registering!")
-            self.dataBase.EnqueUserUpdateBoothOnly(userInfos, boothName)
+            self.dataBase.EnqueUserUpdateBoothOnlyNoFileSubmission(userInfos, boothName)
             st.rerun()
 
     def ShowCompetitionWidget(self, userInfos, boothName):
